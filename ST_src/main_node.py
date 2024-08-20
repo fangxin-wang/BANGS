@@ -1,15 +1,12 @@
 import argparse
 
-import numpy as np
-import torch
-
-from data import *
 import sys
 import logging
 from banzhaf import *
 
-from src.calibrator.calibrator import \
-    TS, VS, ETS, CaGCN, GATS, IRM, SplineCalib, Dirichlet, OrderInvariantCalib
+from calib_src.calibrator.calibrator import \
+    ETS, CaGCN
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='GCN')
@@ -18,8 +15,11 @@ parser.add_argument('--hidden', type=int, default=128,help='Number of hidden uni
 parser.add_argument("--hid_dim_1", type=int, default=32, help="Hidden layer dimension")
 parser.add_argument("--view", type=int, default=5, help="Number of extra view of augmentation")
 
+######### test run #########
 parser.add_argument('--epochs', type=int, default=2000, help='Number of epochs to train.')
-parser.add_argument('--epochs_ft', type=int, default=2000, help='Number of epochs to finetuning.')
+#########
+
+parser.add_argument('--epochs_ft', type=int, default=1000, help='Number of epochs to finetuning.')
 parser.add_argument('--num_layers', type=int, default=2, help='Number of layers.')
 parser.add_argument('--nb_heads', type=int, default=8)
 parser.add_argument('--nb_out_heads', type=int, default=8)
@@ -45,6 +45,7 @@ parser.add_argument("--seed", type=int, default=1024, help="Random seed")
 parser.add_argument("--gpu", type=int, default=0, help="gpu id")
 parser.add_argument("--device", type=str, default='cpu', help="device of the model")
 parser.add_argument("--noisy", type=float, default=0, help="Flip labels")
+parser.add_argument("--PageRank", action="store_true", default=False, help="Calculate Influence Matrix by PageRank")
 
 
 parser.add_argument("--train_portion", type = float, default = 0.05, help="Training Label Portion")
@@ -64,10 +65,15 @@ random.seed(args.seed)
 criterion = torch.nn.CrossEntropyLoss().cuda()
 args.device = torch.device('cuda:{}'.format(args.gpu)) if torch.cuda.is_available() else torch.device('cpu')
 device = args.device
-print(device)
+print(device, args.seed)
 
 
-
+start_time = time.time()
+def log_time_of_step():
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info(f"{elapsed_time:.2f} seconds Passed...")
+    return
 
 def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g, FT=False):
 
@@ -130,6 +136,8 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
         if bad_counter == args.patience:
             # print('early stop')
             break
+        # if epoch % 100 == 0:
+        #     print("Training success at", epoch ,"epoch with test acc", acc_test)
 
     print("best result: ", best_print)
     logger.info("best validation result: {:.4f}".format( best ) )
@@ -228,16 +236,16 @@ def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay =
 
 
 
-
-
 if __name__ == '__main__':
 
-    if not args.split_by_num:
-        g, adj, features, labels, idx_train, idx_val, idx_test, oadj, pyg_graph = load_data(args.dataset, args.noisy,
-                                                                                 args.train_portion, args.valid_portion, args.device, True)
-    else:
-        g, adj, features, labels, idx_train, idx_val, idx_test, oadj, pyg_graph = load_data(args.dataset, args.noisy,
-                                                                                 args.train_num, args.valid_num, args.device, False)
+    IF_PORTION = not args.split_by_num
+    IF_CALIB = not args.multiview
+
+    g, adj, features, labels, idx_train, idx_val, idx_test, pyg_graph = load_data(args.dataset, args.noisy,
+                                                                                 args.train_portion, args.valid_portion, args.device,
+                                                                                        IF_PORTION,IF_CALIB)
+
+    print('Load!')
 
     g = g.to(device)
     features = features.to(device)
@@ -250,6 +258,7 @@ if __name__ == '__main__':
     idx_pseudo = torch.zeros_like(idx_train)
     n_node = labels.size()[0]
     nclass = labels.max().int().item() + 1
+
 
     # args.top = int(n_node * 0.8 // 2000 * 100)
     if args.IGP_pick:
@@ -332,20 +341,38 @@ if __name__ == '__main__':
     tests = []
     pl_acc = []
 
+    log_time_of_step()
     # calculate influence matrix list
-    influence_matrix_list = get_influence_matrix(adj.cpu().to_dense(), k=2)
+    # influence_matrix_list = get_influence_matrix(adj.cpu().to_dense(), k=2)
+
+    if args.IGP_pick:
+        if args.PageRank:
+            influence_matrix = get_ppr_influence_matrix(adj)
+        else:
+            influence_matrix_list = get_influence_matrix(adj, k=2)
+
+    log_time_of_step()
+
 
     val_acc_l, test_acc_l = [], []
+
+    T_conf, T_select, T_retrain = [], [], []
+
     for itr in range(args.iter):
+        t0 = time.time()
+        ##### 1. CONFIDENCE ########
 
-        if not args.multiview:
+        if IF_CALIB:
+            print('calib')
+            cal_dropout_rate = 0.2
 
-            print('Calibrating...')
-            #temp_model = TS(model)
-            temp_model = ETS(model, nclass)
-            # cal_dropout_rate = 0.2
-            # temp_model = CaGCN(model, n_node, nclass, 0.2)
-            #print(temp_model.device)
+            if args.dataset == 'Pubmed':
+                temp_model = CaGCN(model, n_node, nclass, cal_dropout_rate)
+                print('Calibrating with CaGCN...')
+            else:
+                temp_model = ETS(model, nclass)
+                print('Calibrating with ETS...')
+
 
             cal_wdecay = 5e-3
             temp_model.fit(pyg_graph, idx_val, idx_train, cal_wdecay)
@@ -355,21 +382,35 @@ if __name__ == '__main__':
                 output_ave = F.softmax(logits, dim=1).detach()
                 confidence, predict_labels = torch.max(output_ave, dim=1)
 
+            ece_validation = compute_ece(output_ave[idx_val], labels[idx_val])
+            ece_test = compute_ece(output_ave[idx_test], labels[idx_test])
+            logger.info(f"ECE of validation data : {ece_validation}, ECE of test data: {ece_test}")
 
             consist = 1
             consistency.append(round(consist, 5))
-        else:
+
+        elif args.multiview:
+            print('multi view')
             model.eval()
+            # best_output, scores, pl_labels
             output_ave, confidence, predict_labels, consist = multiview_pred(model, features, adj, g, args)
             consistency.append(round(consist,5))
-
-        ece_validation = compute_ece(output_ave[idx_val], labels[idx_val])
-        ece_test = compute_ece(output_ave[idx_test], labels[idx_test])
-        logger.info(f"ECE of validation data : {ece_validation}, ECE of test data: {ece_test}")
+        else:
+            print('one view')
+            output_ave = model(features, adj)
+            confidence, predict_labels = get_confidence(output_ave)
+            consist = 1
+            avg_ece_validation = 20 ## not computed
+            consistency.append(round(consist, 5))
 
         # Cannot choose nodes already augmented or labeled
         confidence[idx_train_ag] = 0
 
+        t1 = time.time()
+        T_conf.append( t1-t0)
+
+
+        ##### 2. SELECTION ########
 
         if args.adaptive_threshold:
             mask, global_thres_updated, local_thres_updated = get_adaptive_threshold(output_ave, idx_train, global_thres, local_thres)
@@ -401,18 +442,31 @@ if __name__ == '__main__':
             #idx_unlabeled = ~(idx_train_ag | idx_test | idx_val)
             #idx_unlabeled = torch.where( idx_unlabeled == True) [0]
 
-            # pl_idx = get_IGP_idx(output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args)
+
             avg_ece_validation = ece_validation/ 20
 
-            # label rate
-            beta = ( n_node - len(PL_node) - args.top) / n_node
 
-            influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+            if not args.PageRank:
+                # label rate
+                beta = ( n_node - len(PL_node) - args.top) / n_node
 
-            pl_idx = get_IGP_idx_game(output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
+                # Perform the calculation: beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+                scaled_matrix_0 = scale_sparse_matrix(influence_matrix_list[0], beta)
+                scaled_matrix_1 = scale_sparse_matrix(influence_matrix_list[1], beta * beta)
+
+                # Add the scaled sparse matrices
+                influence_matrix = add_sparse_matrices(scaled_matrix_0, scaled_matrix_1).to(device) #.to_dense().numpy()
+                #influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+
+            pl_idx = get_IGP_idx_game(adj, output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
             #pl_idx = get_IGP_idx(output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
 
         #print_node_attributes(g, labels, pl_idx, idx_train, idx_train_ag, confidence,logger)
+
+        t2 = time.time()
+        T_select.append(t2 - t1)
+
+        ##### 3. RETRAINING ########
 
         if len(pl_idx) > 0:
             conf_score = confidence[pl_idx]
@@ -458,7 +512,16 @@ if __name__ == '__main__':
                 itr, len(pl_idx), conf_score.min().item(), pred_diff*100, consist, len(PL_node), acc_test, conf_avg_test) )
         else:
             break
+
+        log_time_of_step()
+
+        t3 = time.time()
+        T_retrain.append(t3 - t2)
+        print(T_conf[-1], T_select[-1], T_retrain[-1])
+
     logger.info('original acc: {:.5f}, best test accuracy: {:.5f}, final test accuracy: {:.5f}, consistency: {}, pl_acc: {}'.format(
         acc_test0, max(tests), acc_test, consistency[np.argmax(tests)], pl_acc[np.argmax(tests)]))
     logger.info('Best Acc Early Stopped by Valid Acc: {:.5f}'.format(  test_acc_l[np.argmax(val_acc_l)]) )
+
+    logger.info('Confidence avg time: {:.5f}, Selection avg time: {:.5f}, Retraining avg time: {:.5f}'.format(  np.mean(T_conf), np.mean(T_select), np.mean(T_retrain) ))
     print("ENDS")

@@ -1,8 +1,8 @@
 
-from models import *
+from ST_src.models import *
 import dgl
 from copy import deepcopy
-from data import graph2adj
+from ST_src.data import *
 
 import scipy.sparse as sp
 import torch.optim as optim
@@ -21,7 +21,7 @@ def get_models(args, nfeat, nclass, g, FT=False):
                     dropout=droprate)
     elif model_name == 'GAT':
         model = GAT(g=g,
-                    num_layers=1,
+                    num_layers=2,
                     in_dim=nfeat,
                     num_hidden=args.hidden,
                     num_classes=nclass,
@@ -31,6 +31,13 @@ def get_models(args, nfeat, nclass, g, FT=False):
                     attn_drop=0.6,
                     negative_slope=args.alpha,
                     residual=True)
+    #
+    # elif model_name == 'GraphTransformer':
+    #     model = GraphTransformer(g = g,
+    #                              nfeat = nfeat ,
+    #                              nhid = args.hidden,
+    #                              nclass = nclass,
+    #                              dropout = droprate)
     elif model_name == 'GraphSAGE':
         model = GraphSAGE(g=g,
                           in_feats=nfeat,
@@ -38,7 +45,7 @@ def get_models(args, nfeat, nclass, g, FT=False):
                           n_classes=nclass,
                           activation=F.relu,
                           dropout=droprate,
-                          aggregator_type='gcn')
+                          aggregator_type='gcn') # 'gcn'
     elif model_name == 'APPNP':
         model = APPNP(g=g,
                       in_feats=nfeat,
@@ -86,6 +93,8 @@ def weighted_cross_entropy(output, labels, bald, beta, nclass, sign=True):
     bald += 1e-6
     if sign:
         output = torch.softmax(output, dim=1)
+
+
     # output[output==0] += 1e-6
     # output[output==1] -= 1e-6
     bald = bald / (torch.mean(bald) * beta)
@@ -93,6 +102,7 @@ def weighted_cross_entropy(output, labels, bald, beta, nclass, sign=True):
     loss = -torch.log(torch.sum(output * labels, dim=1))
     loss = torch.sum(loss * bald)
     loss /= labels.size()[0]
+
     return loss
 
 
@@ -108,6 +118,7 @@ def multiview_pred(model, features, adj, g, args):
     device = args.device
     best_output = model(features, adj)
     _, pred = get_confidence(best_output)
+    print("get_confidence")
     consist = torch.ones(pred.shape).bool().to(device)
     
     if not args.multiview:
@@ -119,6 +130,7 @@ def multiview_pred(model, features, adj, g, args):
     else:
         # drop feature
         features_aug = F.dropout(features, p=args.aug_drop)
+        print('features_aug')
         aug_g = deepcopy(g).to(args.device)
         aug_g.ndata['feat'] = features_aug
         if args.model != 'GCN':
@@ -133,7 +145,13 @@ def multiview_pred(model, features, adj, g, args):
         num_dropped_edges = int(num_edges * args.aug_drop)
         edges_to_drop = np.random.choice(num_edges, num_dropped_edges, replace=False)
         g_aug = dgl.remove_edges(g, edges_to_drop).to(device)
-        adj_aug = graph2adj(g_aug).to(device)
+
+        ############
+        # adj_aug = graph2adj(g_aug).to(device)
+        adj_aug = dgl_only_get_adj(g_aug).to(device)
+        ############
+
+
         if args.model != 'GCN':
             model.g = aug_g
             output_aug = model(features, adj)
@@ -171,37 +189,12 @@ def get_mc_adj(oadj, device, droprate=0.1):
         drop = np.where(drop < droprate)[0]
         edge_index_tmp = edge_index[:, drop]
         adj_tmp[edge_index_tmp[0], edge_index_tmp[1]] = 0
+
         adj_tmp = preprocess_adj(sp.coo_matrix(adj_tmp))
         adj_tmp = sparse_mx_to_torch_sparse_tensor(adj_tmp).to(device)
+
         mc_adj.append(adj_tmp)
     return mc_adj
-
-def preprocess_adj(adj, with_ego=True):
-    """Preprocessing of adjacency matrix for simple GCN model and conversion
-    to tuple representation."""
-    if with_ego:
-        adj_normalized = normalize_adj(adj + sp.eye(adj.shape[0]))
-    else:
-        adj_normalized = normalize_adj(adj)
-    return adj_normalized
-
-def normalize_adj(adj):
-    """Symmetrically normalize adjacency matrix."""
-    adj = sp.coo_matrix(adj)
-    rowsum = np.array(adj.sum(1))  # D
-    d_inv_sqrt = np.power(rowsum, -0.5).flatten()  # D^-0.5
-    d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
-    d_mat_inv_sqrt = sp.diags(d_inv_sqrt)  # D^-0.5
-    return adj.dot(d_mat_inv_sqrt).transpose().dot(d_mat_inv_sqrt).tocoo()  # D^-0.5AD^0.5
-
-def sparse_mx_to_torch_sparse_tensor(sparse_mx):
-    """Convert a scipy sparse matrix to a torch sparse tensor."""
-    sparse_mx = sparse_mx.tocoo().astype(np.float32)
-    indices = torch.from_numpy(
-            np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
-    values = torch.from_numpy(sparse_mx.data)
-    shape = torch.Size(sparse_mx.shape)
-    return torch.sparse.FloatTensor(indices, values, shape)
 
 def update_T(output, idx_train, labels, T, device):
     output = torch.softmax(output, dim=1)
@@ -282,30 +275,30 @@ def regenerate_pseudo_label(output, labels, idx_train, unlabeled_index, threshol
     if pseudo_index.size()[0] != 0:
         idx_pseudo[pseudo_index] = 1
     return idx_train_ag, pseudo_labels, idx_pseudo
-
-def generate_IGP_pseudo_label(adj, output, labels, idx_train, idx_unlabeled, device = 'cpu'):
-
-    idx_unlabeled = torch.where(idx_unlabeled == True)[0]
-
-    output = torch.softmax(output, dim=1)
-    confidence, pred_label = torch.max(output, dim=1)
-
-    influence_matrix = get_influence_matrix(adj, k = 2)
-    selected_index = get_IGP_idx(output, labels, idx_train, idx_unlabeled, influence_matrix, N_selected = 20)
-
-    pseudo_index = []
-    pseudo_labels, idx_train_ag = labels.clone().to(device), idx_train.clone().to(device)
-    for i in selected_index:
-        if i not in idx_train:
-            pseudo_labels[i] = pred_label[i]
-            if i in idx_unlabeled:
-                idx_train_ag[i] = True
-                pseudo_index.append(i)
-    idx_pseudo = torch.zeros_like(idx_train)
-    pseudo_index = torch.tensor(pseudo_index)
-    if pseudo_index.size()[0] != 0:
-        idx_pseudo[pseudo_index] = 1
-    return idx_train_ag, pseudo_labels, idx_pseudo
+#
+# def generate_IGP_pseudo_label(adj, output, labels, idx_train, idx_unlabeled, device = 'cpu'):
+#
+#     idx_unlabeled = torch.where(idx_unlabeled == True)[0]
+#
+#     output = torch.softmax(output, dim=1)
+#     confidence, pred_label = torch.max(output, dim=1)
+#
+#     influence_matrix = get_influence_matrix(adj, k = 2)
+#     selected_index = get_IGP_idx(output, labels, idx_train, idx_unlabeled, influence_matrix, N_selected = 20)
+#
+#     pseudo_index = []
+#     pseudo_labels, idx_train_ag = labels.clone().to(device), idx_train.clone().to(device)
+#     for i in selected_index:
+#         if i not in idx_train:
+#             pseudo_labels[i] = pred_label[i]
+#             if i in idx_unlabeled:
+#                 idx_train_ag[i] = True
+#                 pseudo_index.append(i)
+#     idx_pseudo = torch.zeros_like(idx_train)
+#     pseudo_index = torch.tensor(pseudo_index)
+#     if pseudo_index.size()[0] != 0:
+#         idx_pseudo[pseudo_index] = 1
+#     return idx_train_ag, pseudo_labels, idx_pseudo
 
 
 

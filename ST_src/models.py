@@ -4,10 +4,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.nn.parameter import Parameter
+import dgl
 from dgl.nn.pytorch.conv import SAGEConv, APPNPConv, GINConv, SGConv, GATConv
 import dgl.function as fn
 from torch.nn.modules.module import Module
-
 
 class GraphConvolution(Module):
     """
@@ -43,7 +43,6 @@ class GraphConvolution(Module):
         return self.__class__.__name__ + ' (' \
                + str(self.in_features) + ' -> ' \
                + str(self.out_features) + ')'
-
 
 class GCN(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
@@ -110,7 +109,7 @@ class GAT(nn.Module):
         for l in range(1, num_layers):
             # due to multi-head, the in_dim = num_hidden * num_heads
             self.gat_layers.append(
-                (
+                GATConv(
                 num_hidden * heads[l-1], num_hidden, heads[l],
                 feat_drop, attn_drop, negative_slope, residual, self.activation))
         # output projection
@@ -200,7 +199,7 @@ class GIN(nn.Module):
         self.mlp1 = nn.Linear(in_feats, hidden)
         self.mlp2 = nn.Linear(hidden, n_classes)
 
-        self.layer1 = GINConv(self.mlp1, 'max', eps)
+        self.layer1 = GINConv(self.mlp1, 'max', eps) ##max?
         self.layer2 = GINConv(self.mlp2, 'max', eps)
 
         self.activation = activation
