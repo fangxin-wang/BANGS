@@ -2,8 +2,8 @@ import numpy as np
 from random import randint
 import torch
 import torch.nn.functional as F
-from utils import *
-from utils_new import *
+from ST_src.utils import *
+from ST_src.utils_new import *
 
 
 def compute_ece(predictions, labels, n_bins=20):
@@ -45,18 +45,18 @@ def uniform_sample_N(indices, K, N):
     return result_matrix
 
 
-def confidence_importance_sample(confidence, K, N, temperature=1):
-    # Normalize the confidences to ensure they sum to 1 (if not already probabilities)
-    # Lower temperature -> sharper distribution
-    confidences_normalized = torch.softmax(confidence / temperature, dim=0)
-
-    # Sample K indices N times based on the probabilities
-    sampled_indices = torch.multinomial(confidences_normalized, num_samples=K * N, replacement=True)
-
-    # Reshape the flat list of indices into an N x K matrix
-    sampled_indices_matrix = sampled_indices.reshape(N, K)
-
-    return sampled_indices_matrix
+# def confidence_importance_sample(confidence, K, N, temperature=1):
+#     # Normalize the confidences to ensure they sum to 1 (if not already probabilities)
+#     # Lower temperature -> sharper distribution
+#     confidences_normalized = torch.softmax(confidence / temperature, dim=0)
+#
+#     # Sample K indices N times based on the probabilities
+#     sampled_indices = torch.multinomial(confidences_normalized, num_samples=K * N, replacement=True)
+#
+#     # Reshape the flat list of indices into an N x K matrix
+#     sampled_indices_matrix = sampled_indices.reshape(N, K)
+#
+#     return sampled_indices_matrix
 
 
 def convert_to_one_hot(labels, num_class):
@@ -241,25 +241,27 @@ def Entropy_utility_efficient(y_probs, idx_sampled, idx_train, idx_train_ag, idx
     sample_prob =  torch.sparse.mm(influence_submatrix, y_probs_copy[idx_poss_ag])
 
     final_prob = F.normalize(total_prob_origin + sample_prob,  dim= 1)
-
-    entropies = -torch.sum(total_prob_origin * torch.log(final_prob + 1e-9), dim=1)
+    ######## 8.20
+    final_prob = torch.softmax(final_prob, dim = 1)
+    ########
+    entropies = -torch.sum(final_prob * torch.log(final_prob + 1e-9), dim=1)
     total_Ent = entropies.sum()
     # print('total_Ent', total_Ent.item() )
 
-    ### STEP 2
+    # ### STEP 2
+    #
+    # # influence_submatrix_train = idx_train_value * idx_poss_ag
+    #
+    # #idx_pseudo_ag = torch.cat((idx_train_ag, idx_sampled), dim=0)
+    # Prob_train_prop = F.normalize(
+    #     torch.sparse.mm(influence_submatrix_train, y_probs_copy[idx_poss_ag]), dim=1)
+    #
+    # criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
+    # Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
+    #
+    # # print('Cross_Ent', Cross_Ent.item() )
 
-    # influence_submatrix_train = idx_train_value * idx_poss_ag
-
-    #idx_pseudo_ag = torch.cat((idx_train_ag, idx_sampled), dim=0)
-    Prob_train_prop = F.normalize(
-        torch.sparse.mm(influence_submatrix_train, y_probs_copy[idx_poss_ag]), dim=1)
-
-    criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
-    Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
-
-    # print('Cross_Ent', Cross_Ent.item() )
-
-    return - total_Ent - Cross_Ent
+    return - total_Ent #- Cross_Ent
 
 def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation,
                        N=100, FIX_NUM_SAMPLE=False):
@@ -267,15 +269,19 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
     Maximal Sample Reuse:
     - Sampling Budget : N
     """
-    t = 200
+    t = 100
 
-    #influence_matrix = torch.from_numpy(influence_matrix).float()
     # Step 0: Prepare probs of all nodes
     y_probs = output.clone()
-    y_probs = torch.softmax(y_probs, dim=1)
+
+
+    #print('y_probs', torch.max(y_probs), torch.min(y_probs))
+    #y_probs = torch.softmax(y_probs, dim=1)
     # confidence, pred_label = torch.max(y_probs, dim=1)
+
     num_class = y_probs.shape[1]
     y_probs[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
+    #print( 'y_probs', torch.max(y_probs), torch.min(y_probs))
 
     K = args.top
 

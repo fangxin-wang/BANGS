@@ -1,12 +1,12 @@
-
-from ST_src.models import *
 import dgl
 from copy import deepcopy
-from ST_src.data import *
 
 import scipy.sparse as sp
 import torch.optim as optim
-from utils_new import *
+
+from ST_src.data import *
+from ST_src.models import *
+from ST_src.utils_new import *
 
 def get_models(args, nfeat, nclass, g, FT=False):
     model_name = args.model
@@ -106,12 +106,31 @@ def weighted_cross_entropy(output, labels, bald, beta, nclass, sign=True):
     return loss
 
 
-def get_confidence(output, with_softmax=False):
-    if not with_softmax:
+def get_norm_logit(output, with_softmax=False):
+    if with_softmax:
+        output = torch.softmax(output, dim=1)
+    # Substitute inf & -inf value
+    else:
+        EPS = 0.0001
+        logits_no_inf = output[torch.isfinite(output)]
+        max_finite_value, min_finite_value =  torch.max(logits_no_inf), torch.min(logits_no_inf)
+        output[output == float('inf')] = max_finite_value
+        output[output == -float('inf')] = min_finite_value
+        output = torch.abs(output)
+        print(torch.max(output), torch.min(output))
+
+        max_value = torch.max(output)
+        min_value = torch.min(output) + EPS
+        output = (output - min_value) / (max_value-min_value)
+
+    print(torch.max(output), torch.min(output))
+    return output
+
+def get_confidence(output, with_softmax=True):
+    if with_softmax:
         output = torch.softmax(output, dim=1)
     confidence, pred_label = torch.max(output, dim=1)
     return confidence, pred_label
-
 
 @torch.no_grad()
 def multiview_pred(model, features, adj, g, args):
