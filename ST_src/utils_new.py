@@ -3,6 +3,8 @@ import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import dgl
+from collections import Counter
+import math
 
 # def normalize_adjacency_matrix(adj_matrix):
 #     """
@@ -243,4 +245,77 @@ def find_intersection(tensor2_sorted, tensor1_sorted):
     mask = idx < tensor2_sorted.size(0)
     matched = tensor2_sorted[idx[mask]] == tensor1_sorted[mask]
     return tensor1_sorted[mask][matched]
+
+import networkx as nx
+
+def print_node_attributes(G, labels, pl_idx, idx_train, idx_train_ag, confidence, logger):
+    confidence[idx_train_ag] = 1
+    nx_G = G.to('cpu').to_networkx().to_undirected()
+    centrality = nx.degree_centrality(nx_G)
+
+    l_degree, l_centrality, l_confidence_2_hop, l_entropy = [], [], [], []
+    total_neighbor_set = set()
+
+    for node_tensor in pl_idx:
+
+        node = node_tensor.item()
+        # print(f"Node {node}:")
+        # Degree
+        degree = G.in_degrees(node)
+        # print(f"  Degree: {degree}")
+        l_degree.append(degree)
+
+        # Centrality
+        # print(f"  Centrality: {centrality[node]}")
+        l_centrality.append(centrality[node])
+
+        # Neighbors (1-hop)
+        neighbors_1_hop = list(nx_G.neighbors(node))
+        # Neighbors (2-hop)
+        neighbors_2_hop_set = set()
+        for n in neighbors_1_hop:
+            neighbors_2_hop_set.update(nx_G.neighbors(n))
+        neighbors_2_hop_set.difference_update(set(neighbors_1_hop + [node]))
+        neighbors_2_hop = list(neighbors_2_hop_set)
+
+        total_neighbor_set = total_neighbor_set.union(neighbors_2_hop_set)
+
+        confidences_1_hop, confidences_2_hop = confidence [neighbors_1_hop], confidence [neighbors_2_hop]
+        #print(confidences_1_hop)
+        #print(confidences_2_hop)
+        mean_confidence_1_hop = torch.nanmean(confidences_1_hop)
+        mean_confidence_2_hop = torch.nanmean(confidences_2_hop)
+        # print(f"  Mean Confidence 1-hop: {mean_confidence_1_hop}")
+        # print(f"  Mean Confidence 2-hop: {mean_confidence_2_hop}")
+
+        l_confidence_2_hop.append(mean_confidence_2_hop.item())
+
+        label_frequency_1_hop = Counter(labels[neighbors_1_hop].tolist())
+        label_frequency_2_hop = Counter(labels[neighbors_2_hop].tolist())
+        total_labels = len(labels[neighbors_2_hop])
+        # Calculate the entropy
+        entropy = -sum((count / total_labels) * math.log2(count / total_labels) for count in label_frequency_2_hop.values())
+
+        # print(f" Neighborhood Label 1-hop: {label_frequency_1_hop}")
+        # print(f" Neighborhood Label 2-hop: {label_frequency_2_hop}, Entropy: {entropy}")
+        l_entropy.append(entropy)
+
+    logger.info(f"l_degree: {np.nanmean(l_degree) }, l_centrality: {np.nanmean(l_centrality)}, "
+          f"l_confidence_2_hop: {np.nanmean(l_confidence_2_hop)}, l_entropy: {np.nanmean(l_entropy)}, "
+          f"total neighbor num: {len(total_neighbor_set)}")
+
+def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay = 0.9):
+    # output = torch.softmax(output, dim=1)
+
+    max_prob, argmax_pos = torch.max(output, dim = 1)
+
+    global_thres_updated = decay * global_thres + (1-decay) * torch.mean(max_prob[~idx_train])
+    local_thres_updated = decay * local_thres + (1-decay) * torch.mean(output[~idx_train], dim = 0)
+
+    max_local_thres = torch.max(local_thres_updated)
+    local_thres_final = local_thres_updated / max_local_thres * global_thres_updated
+
+    mask = max_prob > local_thres_final[argmax_pos]
+
+    return mask, global_thres_updated, local_thres_updated
 

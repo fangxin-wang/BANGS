@@ -56,32 +56,6 @@ class GCN(nn.Module):
         x = self.dropout(x)
         x = self.gc2(x, adj)
         return x
-    #
-    # def __init__(self, nfeat, nhid, nclass, dropout):
-    #     super(GCN, self).__init__()
-    #     # Initialize three graph convolution layers
-    #     self.gc1 = GraphConvolution(nfeat, nhid)
-    #     self.gc2 = GraphConvolution(nhid, nhid)
-    #     self.gc3 = GraphConvolution(nhid, nclass)
-    #     self.dropout = nn.Dropout(p=dropout)
-    #
-    # def forward(self, x, adj):
-    #     # First layer processing
-    #     x = self.gc1(x, adj)
-    #     x = torch.relu(x)
-    #     x = self.dropout(x)
-    #
-    #     # Second layer processing
-    #     x = self.gc2(x, adj)
-    #     x = torch.relu(x)
-    #     x = self.dropout(x)
-    #
-    #     # Third layer processing
-    #     x = self.gc3(x, adj)
-    #     return x
-
-    # def get_emb(self, x, adj):
-    #     return self.gc1(x, adj)
 
 class GAT(nn.Module):
     def __init__(self,

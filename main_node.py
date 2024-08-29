@@ -2,10 +2,9 @@ import argparse
 
 import sys
 import logging
-from banzhaf import *
+from ST_src.banzhaf import *
 
-from calib_src.calibrator.calibrator import \
-    ETS, CaGCN
+from calib_src.calibrator.calibrator import ETS, CaGCN
 import time
 
 parser = argparse.ArgumentParser()
@@ -157,83 +156,7 @@ def test(adj, features, labels, idx_test, nclass, model_path, g, logger):
     acc_test = accuracy(output[idx_test], labels[idx_test])
     logger.info("Test set results: loss= {:.4f}, accuracy= {:.4f}".format(loss_test.item(),acc_test))
 
-    return acc_test, loss_test
-
-
-from collections import Counter
-
-def print_node_attributes(G, labels, pl_idx, idx_train, idx_train_ag, confidence, logger):
-    confidence[idx_train_ag] = 1
-    nx_G = G.to('cpu').to_networkx().to_undirected()
-    centrality = nx.degree_centrality(nx_G)
-
-    l_degree, l_centrality, l_confidence_2_hop, l_entropy = [], [], [], []
-    total_neighbor_set = set()
-
-    for node_tensor in pl_idx:
-
-        node = node_tensor.item()
-        # print(f"Node {node}:")
-        # Degree
-        degree = G.in_degrees(node)
-        # print(f"  Degree: {degree}")
-        l_degree.append(degree)
-
-        # Centrality
-        # print(f"  Centrality: {centrality[node]}")
-        l_centrality.append(centrality[node])
-
-        # Neighbors (1-hop)
-        neighbors_1_hop = list(nx_G.neighbors(node))
-        # Neighbors (2-hop)
-        neighbors_2_hop_set = set()
-        for n in neighbors_1_hop:
-            neighbors_2_hop_set.update(nx_G.neighbors(n))
-        neighbors_2_hop_set.difference_update(set(neighbors_1_hop + [node]))
-        neighbors_2_hop = list(neighbors_2_hop_set)
-
-        total_neighbor_set = total_neighbor_set.union(neighbors_2_hop_set)
-
-        confidences_1_hop, confidences_2_hop = confidence [neighbors_1_hop], confidence [neighbors_2_hop]
-        #print(confidences_1_hop)
-        #print(confidences_2_hop)
-        mean_confidence_1_hop = torch.nanmean(confidences_1_hop)
-        mean_confidence_2_hop = torch.nanmean(confidences_2_hop)
-        # print(f"  Mean Confidence 1-hop: {mean_confidence_1_hop}")
-        # print(f"  Mean Confidence 2-hop: {mean_confidence_2_hop}")
-
-        l_confidence_2_hop.append(mean_confidence_2_hop.item())
-
-        label_frequency_1_hop = Counter(labels[neighbors_1_hop].tolist())
-        label_frequency_2_hop = Counter(labels[neighbors_2_hop].tolist())
-        total_labels = len(labels[neighbors_2_hop])
-        # Calculate the entropy
-        entropy = -sum((count / total_labels) * math.log2(count / total_labels) for count in label_frequency_2_hop.values())
-
-        # print(f" Neighborhood Label 1-hop: {label_frequency_1_hop}")
-        # print(f" Neighborhood Label 2-hop: {label_frequency_2_hop}, Entropy: {entropy}")
-        l_entropy.append(entropy)
-
-    logger.info(f"l_degree: {np.nanmean(l_degree) }, l_centrality: {np.nanmean(l_centrality)}, "
-          f"l_confidence_2_hop: {np.nanmean(l_confidence_2_hop)}, l_entropy: {np.nanmean(l_entropy)}, "
-          f"total neighbor num: {len(total_neighbor_set)}")
-
-
-def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay = 0.9):
-    # output = torch.softmax(output, dim=1)
-
-    max_prob, argmax_pos = torch.max(output, dim = 1)
-
-    global_thres_updated = decay * global_thres + (1-decay) * torch.mean(max_prob[~idx_train])
-    local_thres_updated = decay * local_thres + (1-decay) * torch.mean(output[~idx_train], dim = 0)
-
-    max_local_thres = torch.max(local_thres_updated)
-    local_thres_final = local_thres_updated / max_local_thres * global_thres_updated
-
-    mask = max_prob > local_thres_final[argmax_pos]
-
-    return mask, global_thres_updated, local_thres_updated
-
+    return acc_test, loss_test, output
 
 
 if __name__ == '__main__':
@@ -244,7 +167,6 @@ if __name__ == '__main__':
     g, adj, features, labels, idx_train, idx_val, idx_test = load_data(args.dataset, args.noisy,
                                                                                  args.train_portion, args.valid_portion, args.device,
                                                                                         IF_PORTION,IF_CALIB)
-
     print('Load!')
 
     g = g.to(device)
@@ -260,22 +182,20 @@ if __name__ == '__main__':
     nclass = labels.max().int().item() + 1
 
 
-    # args.top = int(n_node * 0.8 // 2000 * 100)
-    if args.IGP_pick:
-        model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-IGP.pth' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
-        log_path = './log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-IGP.txt' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
-    if args.conf_pick:
-        model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-Conf.pth' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
-        log_path = './log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-Conf.txt' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
+    # Save log and model
+
     if args.random_pick:
-        model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-Rand.pth' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
-        log_path = './log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-Rand.txt' % (
-            args.model, args.dataset, args.iter, args.top, args.seed, args.multiview)
+        method = "random"
+    elif args.conf_pick:
+        method = "conf"
+    elif args.IGP_pick:
+        method = "IGP"
+
+    model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-%s.pth' % (
+        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method)
+    log_path = './log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-%s.txt' % (
+        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method)
+
     log_time_format = '%Y-%m-%d %H:%M:%S'
     log_format = '%(levelname)s %(asctime)s - %(message)s'
     log_time_format = '%Y-%m-%d %H:%M:%S'
@@ -289,18 +209,8 @@ if __name__ == '__main__':
         ]
     )
     logger = logging.getLogger()
-    if args.random_pick:
-        method = "random_pick"
-    elif args.conf_pick:
-        method = "conf_pick"
-    elif args.IGP_pick:
-        method = "IGP_pick"
 
-    if args.conf_pick == True:
-        logger.info(f"Cautious. model: {args.model}, dataset: {args.dataset}, Noisy_portion: {args.noisy}, N_node: {n_node}, "
-                    f"N_class: {nclass}, Method: {method}, threshold: {args.threshold}, seed: {args.seed}")
-    if args.IGP_pick == True:
-        logger.info(f"IGP. model: {args.model}, dataset: {args.dataset}, Noisy_portion: {args.noisy}, N_node: {n_node}, "
+    logger.info(f"model: {args.model}, dataset: {args.dataset}, Noisy_portion: {args.noisy}, N_node: {n_node}, "
                     f"N_class: {nclass}, Method: {method}, threshold: {args.threshold}, seed: {args.seed}")
 
     train_idx_num = int( torch.sum(idx_train).cpu().numpy() )
@@ -315,6 +225,7 @@ if __name__ == '__main__':
     T = nn.Parameter(torch.eye(nclass, nclass).to(device)) # transition matrix
     T.requires_grad = False
 
+    # Train initial model
 
     bald = torch.ones(n_node).to(device)
     best_valid, best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g)
@@ -325,7 +236,7 @@ if __name__ == '__main__':
     # print(f"Original global threshold: {global_thres}, class conditional threshold: {local_thres}")
     # global_thres, local_thres = global_thres.to(device), local_thres.to(device)
 
-    acc_test0, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
+    acc_test0, _, output_prev = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
 
 
     # generate pseudo labels
@@ -378,13 +289,20 @@ if __name__ == '__main__':
             temp_model.fit(g, features, labels, idx_val, idx_train, cal_wdecay)
             with torch.no_grad():
                 temp_model.eval()
-                logits = temp_model(features, g)
-                output_ave = F.softmax(logits, dim=1).detach()
-                confidence, predict_labels = torch.max(output_ave, dim=1)
+                output_ave = temp_model(features, g)
+                #print( output_ave.shape )
 
-            ece_validation = compute_ece(output_ave[idx_val], labels[idx_val])
-            ece_test = compute_ece(output_ave[idx_test], labels[idx_test])
-            logger.info(f"ECE of validation data : {ece_validation}, ECE of test data: {ece_test}")
+                confidence, predict_labels = get_confidence(output_ave)
+                #print(torch.max(confidence), confidence[:5] )
+
+                # Normalize logits of psuedo label nodes
+                logits_norm = get_norm_logit(output_ave)
+                output_ave = logits_norm
+
+            # output_ave = torch.softmax(logits, dim=1).detach()
+            # ece_validation = compute_ece(output_ave[idx_val], labels[idx_val])
+            # ece_test = compute_ece(output_ave[idx_test], labels[idx_test])
+            # logger.info(f"ECE of validation data : {ece_validation}, ECE of test data: {ece_test}")
 
             consist = 1
             consistency.append(round(consist, 5))
@@ -400,7 +318,7 @@ if __name__ == '__main__':
             output_ave = model(features, adj)
             confidence, predict_labels = get_confidence(output_ave)
             consist = 1
-            avg_ece_validation = 20 ## not computed
+            #avg_ece_validation = 20 ## not computed
             consistency.append(round(consist, 5))
 
         # Cannot choose nodes already augmented or labeled
@@ -412,11 +330,11 @@ if __name__ == '__main__':
 
         ##### 2. SELECTION ########
 
-        if args.adaptive_threshold:
-            mask, global_thres_updated, local_thres_updated = get_adaptive_threshold(output_ave, idx_train, global_thres, local_thres)
-            confidence *= mask
-            global_thres, local_thres = global_thres_updated, local_thres_updated
-            print(f"Current global threshold: {global_thres.cpu().numpy()}, class conditional threshold: {local_thres.cpu().numpy()}")
+        # if args.adaptive_threshold:
+        #     mask, global_thres_updated, local_thres_updated = get_adaptive_threshold(output_ave, idx_train, global_thres, local_thres)
+        #     confidence *= mask
+        #     global_thres, local_thres = global_thres_updated, local_thres_updated
+        #     print(f"Current global threshold: {global_thres.cpu().numpy()}, class conditional threshold: {local_thres.cpu().numpy()}")
 
 
         if args.random_pick:
@@ -443,7 +361,7 @@ if __name__ == '__main__':
             #idx_unlabeled = torch.where( idx_unlabeled == True) [0]
 
 
-            avg_ece_validation = ece_validation/ 20
+            avg_ece_validation = 0 # ece_validation/ 20
 
 
             if not args.PageRank:
@@ -456,7 +374,9 @@ if __name__ == '__main__':
 
                 # Add the scaled sparse matrices
                 influence_matrix = add_sparse_matrices(scaled_matrix_0, scaled_matrix_1).to(device) #.to_dense().numpy()
-                #influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+                influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+
+                #influence_matrix = influence_matrix_list[1]
 
             pl_idx = get_IGP_idx_game(adj, output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
             #pl_idx = get_IGP_idx(output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
@@ -490,26 +410,65 @@ if __name__ == '__main__':
 
 
             # Testing
-            acc_test, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
+            acc_test, _, output_curr = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
+            # ########
+            # prob_prev = torch.softmax(output_prev, dim=1)
+            # prob_curr = torch.softmax(output_curr, dim=1)
+            # print('conf train', torch.max(prob_prev[idx_train], dim = 1 ) )
+            # num_class = output_curr.shape[1]
+            # prob_curr[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
+            # output_diff = torch.abs( prob_prev - prob_curr )
+            #
+            # print(output_diff[idx_train].size(), "idx_train diff: ", torch.mean( output_diff[idx_train] ,  dim= 0) )
+            # idx_pseudo = ~(idx_train | idx_unlabeled)
+            # print(output_diff[idx_pseudo].size(), "idx_pseudo diff: ", torch.mean(output_diff[idx_pseudo], dim=0))
+            # print(output_diff[idx_unlabeled].size(), "unlabeled diff: ", torch.mean(output_diff[idx_unlabeled], dim=0))
+            # output_prev = output_curr
+            # ########
+            ########
+
+            def min_max_normalize(tensor):
+                # Compute the min and max values for each column
+                min_vals = tensor.min(dim=0, keepdim=True)[0]
+                max_vals = tensor.max(dim=0, keepdim=True)[0]
+
+                # Apply the min-max normalization
+                normalized_tensor = (tensor - min_vals) / (max_vals - min_vals)
+
+                return normalized_tensor
+
+
+            # output_prev = min_max_normalize(output_prev)
+            # output_curr = min_max_normalize(output_curr)
+            output_diff = torch.abs( torch.exp(output_prev) - torch.exp(output_curr) )
+
+
+            print(output_diff[idx_train].size(), "idx_train diff: ", torch.mean( output_diff[idx_train] ,  dim= 0) )
+            idx_pseudo = ~(idx_train | idx_unlabeled)
+            print(output_diff[idx_pseudo].size(), "idx_pseudo diff: ", torch.mean(output_diff[idx_pseudo], dim=0))
+            print(output_diff[idx_unlabeled].size(), "unlabeled diff: ", torch.mean(output_diff[idx_unlabeled], dim=0))
+            output_prev = output_curr
+            ########
+
             val_acc_l.append(best_valid)
             test_acc_l.append(acc_test)
 
             ### MODIFY
-            conf_test, _ = torch.max(output_ave[idx_test], dim=1)
-
-            # plt.hist(conf_test, bins=30, alpha=0.5)
-            # plt.title('Histogram of all confidence values')
-            # plt.xlabel('Value')
-            # plt.ylabel('Frequency')
-            # plt.show()
-
-            conf_avg_test = torch.nanmean( conf_test )
+            # conf_test, _ = torch.max(output_ave[idx_test], dim=1)
+            #
+            # # plt.hist(conf_test, bins=30, alpha=0.5)
+            # # plt.title('Histogram of all confidence values')
+            # # plt.xlabel('Value')
+            # # plt.ylabel('Frequency')
+            # # plt.show()
+            #
+            # conf_avg_test = torch.nanmean( conf_test )
 
             ### MODIFY
             tests.append(acc_test)
 
-            logger.info('itr {} summary: added {} pl labels with confidence {:.5f}, pl_acc: {}, consistency {:.5f}, {} pl labels in total, test_acc: {:.4f}, test_conf: {:.4f}'.format(
-                itr, len(pl_idx), conf_score.min().item(), pred_diff*100, consist, len(PL_node), acc_test, conf_avg_test) )
+            logger.info('itr {} summary: added {} pl labels with confidence {:.5f}, pl_acc: {}, consistency {:.5f}, {} pl labels in total, test_acc: {:.4f}'.format(
+                itr, len(pl_idx), conf_score.min().item(), pred_diff*100, consist, len(PL_node), acc_test) )
         else:
             break
 
