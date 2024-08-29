@@ -241,7 +241,7 @@ if __name__ == '__main__':
     IF_PORTION = not args.split_by_num
     IF_CALIB = not args.multiview
 
-    g, adj, features, labels, idx_train, idx_val, idx_test, pyg_graph = load_data(args.dataset, args.noisy,
+    g, adj, features, labels, idx_train, idx_val, idx_test = load_data(args.dataset, args.noisy,
                                                                                  args.train_portion, args.valid_portion, args.device,
                                                                                         IF_PORTION,IF_CALIB)
 
@@ -375,10 +375,10 @@ if __name__ == '__main__':
 
 
             cal_wdecay = 5e-3
-            temp_model.fit(pyg_graph, idx_val, idx_train, cal_wdecay)
+            temp_model.fit(g, features, labels, idx_val, idx_train, cal_wdecay)
             with torch.no_grad():
                 temp_model.eval()
-                logits = temp_model(pyg_graph.x, pyg_graph.adj)
+                logits = temp_model(features, g)
                 output_ave = F.softmax(logits, dim=1).detach()
                 confidence, predict_labels = torch.max(output_ave, dim=1)
 

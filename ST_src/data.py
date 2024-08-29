@@ -179,7 +179,7 @@ def load_data(dataset, noisy_portion = 0, train_portion = 0.05, valid_portion = 
         from ogb.nodeproppred import DglNodePropPredDataset
         data_obj = DglNodePropPredDataset(name='ogbn-arxiv')
 
-        pyg_graph = objn_to_pyg(data_obj)
+        # pyg_graph = objn_to_pyg(data_obj)
 
         # Extract the graph and labels
         dgl_graph, labels = data_obj[0]
@@ -210,7 +210,7 @@ def load_data(dataset, noisy_portion = 0, train_portion = 0.05, valid_portion = 
         features = g.ndata['feat']
         labels = g.ndata['label']
 
-        pyg_graph = dgl_to_pyg(data, device)
+        # pyg_graph = dgl_to_pyg(data, device)
 
     #Check if one-hot label
     # if labels.max().int().item() == 1:
@@ -243,7 +243,7 @@ def load_data(dataset, noisy_portion = 0, train_portion = 0.05, valid_portion = 
     ##########################
 
 
-    return g, adj, features, labels, train_mask, val_mask, test_mask, pyg_graph
+    return g, adj, features, labels, train_mask, val_mask, test_mask
 
 
 
