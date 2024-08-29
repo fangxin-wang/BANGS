@@ -286,10 +286,10 @@ if __name__ == '__main__':
 
 
             cal_wdecay = 5e-3
-            temp_model.fit(g, features, labels, idx_val, idx_train, cal_wdecay)
+            temp_model.fit(features, adj, labels, idx_val, idx_train, cal_wdecay)
             with torch.no_grad():
                 temp_model.eval()
-                output_ave = temp_model(features, g)
+                output_ave = temp_model(features, adj)
                 #print( output_ave.shape )
 
                 confidence, predict_labels = get_confidence(output_ave)
