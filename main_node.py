@@ -2,6 +2,9 @@ import argparse
 
 import sys
 import logging
+
+import pandas as pd
+
 from ST_src.banzhaf import *
 
 from calib_src.calibrator.calibrator import ETS, CaGCN
@@ -236,7 +239,9 @@ if __name__ == '__main__':
     # print(f"Original global threshold: {global_thres}, class conditional threshold: {local_thres}")
     # global_thres, local_thres = global_thres.to(device), local_thres.to(device)
 
+    ACC_LIST, ENT_LIST = [],[]
     acc_test0, _, output_prev = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
+    ACC_LIST.append(acc_test0)
 
 
     # generate pseudo labels
@@ -411,19 +416,40 @@ if __name__ == '__main__':
 
             # Testing
             acc_test, _, output_curr = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
+            ACC_LIST.append(acc_test)
+
             # ########
-            # prob_prev = torch.softmax(output_prev, dim=1)
-            # prob_curr = torch.softmax(output_curr, dim=1)
-            # print('conf train', torch.max(prob_prev[idx_train], dim = 1 ) )
-            # num_class = output_curr.shape[1]
-            # prob_curr[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
-            # output_diff = torch.abs( prob_prev - prob_curr )
+            prob_prev = torch.softmax(output_prev, dim=1)
+            prob_curr = torch.softmax(output_curr, dim=1)
+
+            print('conf train', torch.max(prob_prev[idx_train], dim = 1 ) )
+            num_class = output_curr.shape[1]
+            prob_prev[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
+
+            output_diff = torch.abs( prob_prev - prob_curr )
+
+
+            idx_unlabeled = ~idx_train_ag
+            idx_pseudo = ~(idx_train | idx_unlabeled)
+
+            ent_train, ent_pseudo, ent_unlabeled = (output_diff[idx_train]).numpy(),(output_diff[idx_pseudo]).numpy(), (output_diff[idx_unlabeled]).numpy()
+            print( "idx_train diff prob: ", np.mean(ent_train ,  axis= 0))
+
+            print( "idx_pseudo diff prob: ", np.mean( ent_pseudo ,  axis= 0))
+            print( "unlabeled diff prob: ",np.mean(  ent_unlabeled ,  axis= 0))
+
+            # # Create the box plot
+            # plt.boxplot([ent_train, ent_pseudo, ent_unlabeled], labels = ['ent_train', 'ent_pseudo', 'ent_unlabeled'])
             #
-            # print(output_diff[idx_train].size(), "idx_train diff: ", torch.mean( output_diff[idx_train] ,  dim= 0) )
-            # idx_pseudo = ~(idx_train | idx_unlabeled)
-            # print(output_diff[idx_pseudo].size(), "idx_pseudo diff: ", torch.mean(output_diff[idx_pseudo], dim=0))
-            # print(output_diff[idx_unlabeled].size(), "unlabeled diff: ", torch.mean(output_diff[idx_unlabeled], dim=0))
-            # output_prev = output_curr
+            # # Add labels and title
+            # plt.xlabel('Dataset')
+            # plt.ylabel('Value')
+            # plt.title('Box Plot Comparison of Entropy Values')
+            #
+            # # Display the plot
+            # plt.show()
+
+
             # ########
             ########
 
@@ -440,14 +466,31 @@ if __name__ == '__main__':
 
             # output_prev = min_max_normalize(output_prev)
             # output_curr = min_max_normalize(output_curr)
-            output_diff = torch.abs( torch.exp(output_prev) - torch.exp(output_curr) )
+
+            # output_p_c = (output_prev - output_curr).numpy()
+            # output_diff = np.absolute( np.diff(output_p_c, axis=1) )
+            # print(output_diff.shape)
+            entropy_prev = -torch.sum(prob_prev * torch.log(prob_prev + 1e-9), dim=1)
+            entropy_curr = -torch.sum(prob_curr * torch.log(prob_curr + 1e-9), dim=1)
 
 
-            print(output_diff[idx_train].size(), "idx_train diff: ", torch.mean( output_diff[idx_train] ,  dim= 0) )
+            output_diff = torch.abs(entropy_prev - entropy_curr).numpy()
+
+            idx_unlabeled = ~idx_train_ag
             idx_pseudo = ~(idx_train | idx_unlabeled)
-            print(output_diff[idx_pseudo].size(), "idx_pseudo diff: ", torch.mean(output_diff[idx_pseudo], dim=0))
-            print(output_diff[idx_unlabeled].size(), "unlabeled diff: ", torch.mean(output_diff[idx_unlabeled], dim=0))
+
+            print("idx_train diff ent: ", np.mean( output_diff[idx_train] ) )
+            print( "idx_pseudo diff ent: ", np.mean(output_diff[idx_pseudo]))
+            print("unlabeled diff ent: ", np.mean(output_diff[idx_unlabeled]))
+
+            print("total entropy before:", torch.mean(entropy_prev[idx_unlabeled]), "after:",
+                  torch.mean(entropy_curr[idx_unlabeled]) )
+            diff_unlabeled_ent = torch.mean(entropy_curr[idx_unlabeled]).item() - torch.mean(entropy_prev[idx_unlabeled]).item()
+            print( "ACC +", ACC_LIST[-1]-ACC_LIST[-2], "Entro +", diff_unlabeled_ent)
+            ENT_LIST.append( diff_unlabeled_ent )
+
             output_prev = output_curr
+
             ########
 
             val_acc_l.append(best_valid)
@@ -477,6 +520,40 @@ if __name__ == '__main__':
         t3 = time.time()
         T_retrain.append(t3 - t2)
         print(T_conf[-1], T_select[-1], T_retrain[-1])
+
+    print(ACC_LIST,ENT_LIST)
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    ENT_DIFF = ENT_LIST[: -1]
+    ACC_DIFF = np.diff(ACC_LIST)[: len(ENT_DIFF) ]
+    # Plot
+    fig, ax1 = plt.subplots(figsize=(8, 5))
+
+    # Accuracy line
+    ax1.set_xlabel('Index')
+    ax1.set_ylabel('Accuracy', color='tab:blue')
+    ax1.plot(ACC_DIFF, color='tab:blue', label='Accuracy Diff')
+    ax1.tick_params(axis='y', labelcolor='tab:blue')
+
+    # Entropy line (second y-axis)
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Entropy', color='tab:red')
+    ax2.plot(ENT_DIFF, color='tab:red', label='Entropy Diff')
+    ax2.tick_params(axis='y', labelcolor='tab:red')
+
+    # Show plot
+    fig.tight_layout()
+    plt.title("Accuracy and Entropy Over Time")
+    plt.show()
+
+    symbol_correlation = np.sign(ENT_DIFF) == np.sign(ACC_DIFF)
+    # Calculate the percentage of correlation in symbol
+    symbol_correlation_percentage = np.mean(symbol_correlation) * 100
+    print("symbol_correlation_percentage   ", symbol_correlation_percentage)
+
+    correlation = np.corrcoef(ENT_DIFF, ACC_DIFF)[0, 1]
+    print("correlation  ",correlation)
 
     logger.info('original acc: {:.5f}, best test accuracy: {:.5f}, final test accuracy: {:.5f}, consistency: {}, pl_acc: {}'.format(
         acc_test0, max(tests), acc_test, consistency[np.argmax(tests)], pl_acc[np.argmax(tests)]))

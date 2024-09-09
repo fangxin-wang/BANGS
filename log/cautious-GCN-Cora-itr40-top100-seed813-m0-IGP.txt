@@ -1010,3 +1010,974 @@ INFO 2024-08-26 11:59:11 - best validation result: 0.7800
 INFO 2024-08-26 11:59:11 - Test set results: loss= 0.6923, accuracy= 0.7930
 INFO 2024-08-26 11:59:11 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
 INFO 2024-08-26 11:59:11 - 108.68 seconds Passed...
+INFO 2024-08-31 13:26:45 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:26:45 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:26:52 - best validation result: 0.8000
+INFO 2024-08-31 13:26:52 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:26:52 - 6.95 seconds Passed...
+INFO 2024-08-31 13:26:52 - 6.95 seconds Passed...
+INFO 2024-08-31 13:27:11 - best validation result: 0.7860
+INFO 2024-08-31 13:27:11 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:27:11 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 13:27:11 - 26.65 seconds Passed...
+INFO 2024-08-31 13:27:22 - best validation result: 0.7680
+INFO 2024-08-31 13:27:22 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 13:27:22 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 13:27:22 - 37.45 seconds Passed...
+INFO 2024-08-31 13:27:41 - best validation result: 0.7960
+INFO 2024-08-31 13:27:41 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 13:27:41 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 13:27:41 - 56.74 seconds Passed...
+INFO 2024-08-31 13:28:01 - best validation result: 0.7780
+INFO 2024-08-31 13:28:01 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 13:28:01 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 13:28:01 - 76.64 seconds Passed...
+INFO 2024-08-31 13:28:22 - best validation result: 0.7820
+INFO 2024-08-31 13:28:22 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 13:28:22 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 13:28:22 - 97.04 seconds Passed...
+INFO 2024-08-31 13:30:38 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:30:38 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:30:45 - best validation result: 0.8000
+INFO 2024-08-31 13:30:45 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:30:45 - 6.78 seconds Passed...
+INFO 2024-08-31 13:30:45 - 6.78 seconds Passed...
+INFO 2024-08-31 13:31:04 - best validation result: 0.7860
+INFO 2024-08-31 13:31:04 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:31:04 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 13:31:04 - 25.92 seconds Passed...
+INFO 2024-08-31 13:31:15 - best validation result: 0.7680
+INFO 2024-08-31 13:31:15 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 13:31:15 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 13:31:15 - 36.65 seconds Passed...
+INFO 2024-08-31 13:31:50 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:31:50 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:31:57 - best validation result: 0.8000
+INFO 2024-08-31 13:31:57 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:31:57 - 6.79 seconds Passed...
+INFO 2024-08-31 13:31:57 - 6.80 seconds Passed...
+INFO 2024-08-31 13:32:16 - best validation result: 0.7860
+INFO 2024-08-31 13:32:16 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:32:16 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 13:32:16 - 25.81 seconds Passed...
+INFO 2024-08-31 13:32:26 - best validation result: 0.7680
+INFO 2024-08-31 13:32:26 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 13:32:26 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 13:32:26 - 36.59 seconds Passed...
+INFO 2024-08-31 13:45:29 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:45:29 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:45:35 - best validation result: 0.8000
+INFO 2024-08-31 13:45:35 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:45:35 - 6.80 seconds Passed...
+INFO 2024-08-31 13:45:35 - 6.80 seconds Passed...
+INFO 2024-08-31 13:45:54 - best validation result: 0.7860
+INFO 2024-08-31 13:45:54 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:46:44 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:46:44 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:46:51 - best validation result: 0.8000
+INFO 2024-08-31 13:46:51 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:46:51 - 6.85 seconds Passed...
+INFO 2024-08-31 13:46:51 - 6.85 seconds Passed...
+INFO 2024-08-31 13:47:11 - best validation result: 0.7860
+INFO 2024-08-31 13:47:11 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:47:53 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:47:53 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:48:00 - best validation result: 0.8000
+INFO 2024-08-31 13:48:00 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:48:00 - 6.87 seconds Passed...
+INFO 2024-08-31 13:48:00 - 6.87 seconds Passed...
+INFO 2024-08-31 13:48:19 - best validation result: 0.7860
+INFO 2024-08-31 13:48:19 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:49:01 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:49:01 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:49:08 - best validation result: 0.8000
+INFO 2024-08-31 13:49:08 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:49:08 - 6.93 seconds Passed...
+INFO 2024-08-31 13:49:08 - 6.93 seconds Passed...
+INFO 2024-08-31 13:49:28 - best validation result: 0.7860
+INFO 2024-08-31 13:49:28 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:51:29 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:51:29 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:51:36 - best validation result: 0.8000
+INFO 2024-08-31 13:51:36 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:51:36 - 6.90 seconds Passed...
+INFO 2024-08-31 13:51:36 - 6.90 seconds Passed...
+INFO 2024-08-31 13:51:55 - best validation result: 0.7860
+INFO 2024-08-31 13:51:55 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:53:22 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:53:22 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:53:29 - best validation result: 0.8000
+INFO 2024-08-31 13:53:29 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:53:29 - 7.08 seconds Passed...
+INFO 2024-08-31 13:53:29 - 7.08 seconds Passed...
+INFO 2024-08-31 13:53:48 - best validation result: 0.7860
+INFO 2024-08-31 13:53:48 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:55:16 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 13:55:16 - 114.35 seconds Passed...
+INFO 2024-08-31 13:55:27 - best validation result: 0.7680
+INFO 2024-08-31 13:55:28 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 13:55:34 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 13:55:34 - 131.56 seconds Passed...
+INFO 2024-08-31 13:56:29 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:56:29 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:56:36 - best validation result: 0.8000
+INFO 2024-08-31 13:56:36 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:56:36 - 6.90 seconds Passed...
+INFO 2024-08-31 13:56:36 - 6.91 seconds Passed...
+INFO 2024-08-31 13:56:56 - best validation result: 0.7860
+INFO 2024-08-31 13:56:56 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 13:57:01 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 13:57:01 - 31.61 seconds Passed...
+INFO 2024-08-31 13:57:12 - best validation result: 0.7680
+INFO 2024-08-31 13:57:12 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 13:57:16 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 13:57:16 - 46.97 seconds Passed...
+INFO 2024-08-31 13:57:37 - best validation result: 0.7960
+INFO 2024-08-31 13:57:37 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 13:58:26 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 13:58:26 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 13:58:34 - best validation result: 0.8000
+INFO 2024-08-31 13:58:34 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 13:58:34 - 7.58 seconds Passed...
+INFO 2024-08-31 13:58:34 - 7.59 seconds Passed...
+INFO 2024-08-31 13:58:53 - best validation result: 0.7860
+INFO 2024-08-31 13:58:53 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:00:01 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:00:01 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:00:08 - best validation result: 0.8000
+INFO 2024-08-31 14:00:08 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:00:08 - 7.51 seconds Passed...
+INFO 2024-08-31 14:00:08 - 7.51 seconds Passed...
+INFO 2024-08-31 14:00:25 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:00:25 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:00:32 - best validation result: 0.8000
+INFO 2024-08-31 14:00:32 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:00:32 - 6.85 seconds Passed...
+INFO 2024-08-31 14:00:32 - 6.85 seconds Passed...
+INFO 2024-08-31 14:00:52 - best validation result: 0.7860
+INFO 2024-08-31 14:00:52 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:02:34 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:02:34 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:02:40 - best validation result: 0.8000
+INFO 2024-08-31 14:02:40 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:02:40 - 6.87 seconds Passed...
+INFO 2024-08-31 14:02:40 - 6.87 seconds Passed...
+INFO 2024-08-31 14:03:00 - best validation result: 0.7860
+INFO 2024-08-31 14:03:00 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:03:08 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 14:03:08 - 34.77 seconds Passed...
+INFO 2024-08-31 14:03:19 - best validation result: 0.7680
+INFO 2024-08-31 14:03:19 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 14:04:43 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 14:04:43 - 129.58 seconds Passed...
+INFO 2024-08-31 14:05:02 - best validation result: 0.7960
+INFO 2024-08-31 14:05:02 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 14:05:13 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 14:05:13 - 159.68 seconds Passed...
+INFO 2024-08-31 14:05:33 - best validation result: 0.7780
+INFO 2024-08-31 14:05:33 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 14:06:11 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 14:06:11 - 217.89 seconds Passed...
+INFO 2024-08-31 14:06:31 - best validation result: 0.7820
+INFO 2024-08-31 14:06:31 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 14:07:01 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 14:07:01 - 267.34 seconds Passed...
+INFO 2024-08-31 14:07:15 - best validation result: 0.7800
+INFO 2024-08-31 14:07:15 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-08-31 14:07:21 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-08-31 14:07:21 - 287.32 seconds Passed...
+INFO 2024-08-31 14:07:40 - best validation result: 0.7960
+INFO 2024-08-31 14:07:40 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-08-31 14:15:16 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:15:16 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:15:23 - best validation result: 0.8000
+INFO 2024-08-31 14:15:23 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:15:23 - 6.94 seconds Passed...
+INFO 2024-08-31 14:15:23 - 6.94 seconds Passed...
+INFO 2024-08-31 14:26:35 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:26:35 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:26:42 - best validation result: 0.8000
+INFO 2024-08-31 14:26:42 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:26:42 - 7.05 seconds Passed...
+INFO 2024-08-31 14:26:42 - 7.05 seconds Passed...
+INFO 2024-08-31 14:27:02 - best validation result: 0.7860
+INFO 2024-08-31 14:27:02 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:27:02 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 14:27:02 - 26.26 seconds Passed...
+INFO 2024-08-31 14:27:12 - best validation result: 0.7680
+INFO 2024-08-31 14:27:12 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 14:27:12 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 14:27:12 - 36.97 seconds Passed...
+INFO 2024-08-31 14:27:32 - best validation result: 0.7960
+INFO 2024-08-31 14:27:32 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 14:27:32 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 14:27:32 - 57.06 seconds Passed...
+INFO 2024-08-31 14:27:51 - best validation result: 0.7780
+INFO 2024-08-31 14:27:51 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 14:27:51 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 14:27:51 - 76.08 seconds Passed...
+INFO 2024-08-31 14:28:11 - best validation result: 0.7820
+INFO 2024-08-31 14:28:11 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 14:28:11 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 14:28:11 - 95.73 seconds Passed...
+INFO 2024-08-31 14:28:25 - best validation result: 0.7800
+INFO 2024-08-31 14:28:25 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-08-31 14:28:25 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-08-31 14:28:25 - 110.19 seconds Passed...
+INFO 2024-08-31 14:28:46 - best validation result: 0.7960
+INFO 2024-08-31 14:28:46 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-08-31 14:28:46 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 14:28:46 - 130.37 seconds Passed...
+INFO 2024-08-31 14:28:59 - best validation result: 0.8000
+INFO 2024-08-31 14:28:59 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-08-31 14:28:59 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-08-31 14:28:59 - 143.47 seconds Passed...
+INFO 2024-08-31 14:29:12 - best validation result: 0.8020
+INFO 2024-08-31 14:29:12 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-08-31 14:29:12 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 14:29:12 - 156.43 seconds Passed...
+INFO 2024-08-31 14:29:23 - best validation result: 0.8000
+INFO 2024-08-31 14:29:23 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-08-31 14:29:23 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-08-31 14:29:23 - 167.40 seconds Passed...
+INFO 2024-08-31 14:29:34 - best validation result: 0.8060
+INFO 2024-08-31 14:29:34 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-08-31 14:29:34 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-08-31 14:29:34 - 178.56 seconds Passed...
+INFO 2024-08-31 14:29:47 - best validation result: 0.8100
+INFO 2024-08-31 14:29:47 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-08-31 14:29:47 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 14:29:47 - 192.08 seconds Passed...
+INFO 2024-08-31 14:30:01 - best validation result: 0.8140
+INFO 2024-08-31 14:30:01 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-08-31 14:30:01 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-08-31 14:30:01 - 205.60 seconds Passed...
+INFO 2024-08-31 14:30:10 - best validation result: 0.8100
+INFO 2024-08-31 14:30:10 - Test set results: loss= 0.8461, accuracy= 0.8290
+INFO 2024-08-31 14:30:10 - itr 13 summary: added 100 pl labels with confidence 0.69058, pl_acc: 84.0, consistency 1.00000, 1400 pl labels in total, test_acc: 0.8290
+INFO 2024-08-31 14:30:10 - 214.27 seconds Passed...
+INFO 2024-08-31 14:30:21 - best validation result: 0.8120
+INFO 2024-08-31 14:30:21 - Test set results: loss= 0.6563, accuracy= 0.8350
+INFO 2024-08-31 14:30:21 - itr 14 summary: added 100 pl labels with confidence 0.62800, pl_acc: 81.0, consistency 1.00000, 1500 pl labels in total, test_acc: 0.8350
+INFO 2024-08-31 14:30:21 - 225.54 seconds Passed...
+INFO 2024-08-31 14:30:35 - best validation result: 0.8140
+INFO 2024-08-31 14:30:35 - Test set results: loss= 0.5812, accuracy= 0.8320
+INFO 2024-08-31 14:30:35 - itr 15 summary: added 100 pl labels with confidence 0.56777, pl_acc: 83.0, consistency 1.00000, 1600 pl labels in total, test_acc: 0.8320
+INFO 2024-08-31 14:30:35 - 239.78 seconds Passed...
+INFO 2024-08-31 14:30:47 - best validation result: 0.8180
+INFO 2024-08-31 14:30:47 - Test set results: loss= 0.6192, accuracy= 0.8370
+INFO 2024-08-31 14:30:47 - itr 16 summary: added 100 pl labels with confidence 0.50925, pl_acc: 72.0, consistency 1.00000, 1700 pl labels in total, test_acc: 0.8370
+INFO 2024-08-31 14:30:47 - 251.55 seconds Passed...
+INFO 2024-08-31 14:30:57 - best validation result: 0.8140
+INFO 2024-08-31 14:30:57 - Test set results: loss= 0.6601, accuracy= 0.8340
+INFO 2024-08-31 14:30:57 - itr 17 summary: added 100 pl labels with confidence 0.44229, pl_acc: 67.0, consistency 1.00000, 1800 pl labels in total, test_acc: 0.8340
+INFO 2024-08-31 14:30:57 - 262.02 seconds Passed...
+INFO 2024-08-31 14:31:07 - best validation result: 0.8100
+INFO 2024-08-31 14:31:07 - Test set results: loss= 0.7592, accuracy= 0.8240
+INFO 2024-08-31 14:31:07 - itr 18 summary: added 100 pl labels with confidence 0.39452, pl_acc: 74.0, consistency 1.00000, 1900 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 14:31:07 - 271.29 seconds Passed...
+INFO 2024-08-31 14:31:16 - best validation result: 0.8160
+INFO 2024-08-31 14:31:16 - Test set results: loss= 0.7293, accuracy= 0.8340
+INFO 2024-08-31 14:31:16 - itr 19 summary: added 100 pl labels with confidence 0.33610, pl_acc: 75.0, consistency 1.00000, 2000 pl labels in total, test_acc: 0.8340
+INFO 2024-08-31 14:31:16 - 281.05 seconds Passed...
+INFO 2024-08-31 14:31:26 - best validation result: 0.8160
+INFO 2024-08-31 14:31:26 - Test set results: loss= 0.7430, accuracy= 0.8240
+INFO 2024-08-31 14:31:26 - itr 20 summary: added 100 pl labels with confidence 0.28503, pl_acc: 65.0, consistency 1.00000, 2100 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 14:31:26 - 290.82 seconds Passed...
+INFO 2024-08-31 14:31:36 - best validation result: 0.8140
+INFO 2024-08-31 14:31:36 - Test set results: loss= 0.7391, accuracy= 0.8270
+INFO 2024-08-31 14:31:36 - itr 21 summary: added 100 pl labels with confidence 0.24380, pl_acc: 64.0, consistency 1.00000, 2200 pl labels in total, test_acc: 0.8270
+INFO 2024-08-31 14:31:36 - 300.51 seconds Passed...
+INFO 2024-08-31 14:31:46 - best validation result: 0.8200
+INFO 2024-08-31 14:31:46 - Test set results: loss= 0.7183, accuracy= 0.8250
+INFO 2024-08-31 14:31:46 - itr 22 summary: added 100 pl labels with confidence 0.20785, pl_acc: 69.0, consistency 1.00000, 2300 pl labels in total, test_acc: 0.8250
+INFO 2024-08-31 14:31:46 - 310.55 seconds Passed...
+INFO 2024-08-31 14:31:55 - best validation result: 0.8200
+INFO 2024-08-31 14:31:55 - Test set results: loss= 0.7692, accuracy= 0.8250
+INFO 2024-08-31 14:31:55 - itr 23 summary: added 100 pl labels with confidence 0.17433, pl_acc: 61.0, consistency 1.00000, 2400 pl labels in total, test_acc: 0.8250
+INFO 2024-08-31 14:31:55 - 320.09 seconds Passed...
+INFO 2024-08-31 14:32:05 - best validation result: 0.8180
+INFO 2024-08-31 14:32:05 - Test set results: loss= 0.7628, accuracy= 0.8270
+INFO 2024-08-31 14:32:05 - itr 24 summary: added 168 pl labels with confidence 0.14772, pl_acc: 57.14285714285714, consistency 1.00000, 2568 pl labels in total, test_acc: 0.8270
+INFO 2024-08-31 14:32:05 - 329.78 seconds Passed...
+INFO 2024-08-31 14:32:07 - original acc: 0.80500, best test accuracy: 0.83700, final test accuracy: 0.82700, consistency: 1, pl_acc: 0.86
+INFO 2024-08-31 14:32:07 - Best Acc Early Stopped by Valid Acc: 0.82500
+INFO 2024-08-31 14:32:07 - Confidence avg time: 0.73803, Selection avg time: 0.51205, Retraining avg time: 11.67118
+INFO 2024-08-31 14:45:15 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:45:15 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:45:22 - best validation result: 0.8000
+INFO 2024-08-31 14:45:22 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:45:22 - 7.62 seconds Passed...
+INFO 2024-08-31 14:45:22 - 7.62 seconds Passed...
+INFO 2024-08-31 14:45:42 - best validation result: 0.7860
+INFO 2024-08-31 14:45:42 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:45:42 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 14:45:42 - 28.04 seconds Passed...
+INFO 2024-08-31 14:45:54 - best validation result: 0.7680
+INFO 2024-08-31 14:45:54 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 14:45:54 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 14:45:54 - 39.38 seconds Passed...
+INFO 2024-08-31 14:46:14 - best validation result: 0.7960
+INFO 2024-08-31 14:46:14 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 14:46:14 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 14:46:14 - 59.41 seconds Passed...
+INFO 2024-08-31 14:46:34 - best validation result: 0.7780
+INFO 2024-08-31 14:46:34 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 14:46:34 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 14:46:34 - 79.49 seconds Passed...
+INFO 2024-08-31 14:46:54 - best validation result: 0.7820
+INFO 2024-08-31 14:46:54 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 14:46:54 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 14:46:54 - 99.98 seconds Passed...
+INFO 2024-08-31 14:51:03 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 14:51:03 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 14:51:09 - best validation result: 0.8000
+INFO 2024-08-31 14:51:09 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 14:51:09 - 7.00 seconds Passed...
+INFO 2024-08-31 14:51:09 - 7.00 seconds Passed...
+INFO 2024-08-31 14:51:30 - best validation result: 0.7860
+INFO 2024-08-31 14:51:30 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 14:51:30 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 14:51:30 - 27.44 seconds Passed...
+INFO 2024-08-31 14:51:41 - best validation result: 0.7680
+INFO 2024-08-31 14:51:41 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 14:51:41 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 14:51:41 - 38.53 seconds Passed...
+INFO 2024-08-31 14:52:01 - best validation result: 0.7960
+INFO 2024-08-31 14:52:01 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 14:52:01 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 14:52:01 - 58.19 seconds Passed...
+INFO 2024-08-31 14:52:24 - best validation result: 0.7780
+INFO 2024-08-31 14:52:24 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 14:52:24 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 14:52:24 - 81.18 seconds Passed...
+INFO 2024-08-31 14:52:43 - best validation result: 0.7820
+INFO 2024-08-31 14:52:43 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 14:52:43 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 14:52:43 - 100.89 seconds Passed...
+INFO 2024-08-31 14:52:57 - best validation result: 0.7800
+INFO 2024-08-31 14:52:57 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-08-31 14:52:57 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-08-31 14:52:57 - 115.03 seconds Passed...
+INFO 2024-08-31 14:53:19 - best validation result: 0.7960
+INFO 2024-08-31 14:53:19 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-08-31 14:53:19 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 14:53:19 - 136.54 seconds Passed...
+INFO 2024-08-31 14:53:32 - best validation result: 0.8000
+INFO 2024-08-31 14:53:32 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-08-31 14:53:32 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-08-31 14:53:32 - 149.75 seconds Passed...
+INFO 2024-08-31 14:53:45 - best validation result: 0.8020
+INFO 2024-08-31 14:53:45 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-08-31 14:53:45 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 14:53:45 - 162.39 seconds Passed...
+INFO 2024-08-31 14:53:56 - best validation result: 0.8000
+INFO 2024-08-31 14:53:56 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-08-31 14:53:56 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-08-31 14:53:56 - 173.30 seconds Passed...
+INFO 2024-08-31 14:54:07 - best validation result: 0.8060
+INFO 2024-08-31 14:54:07 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-08-31 14:54:07 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-08-31 14:54:07 - 184.18 seconds Passed...
+INFO 2024-08-31 14:54:21 - best validation result: 0.8100
+INFO 2024-08-31 14:54:21 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-08-31 14:54:21 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 14:54:21 - 198.37 seconds Passed...
+INFO 2024-08-31 14:54:35 - best validation result: 0.8140
+INFO 2024-08-31 14:54:35 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-08-31 14:54:35 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-08-31 14:54:35 - 212.53 seconds Passed...
+INFO 2024-08-31 15:07:58 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:07:58 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:08:40 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:08:40 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:08:46 - best validation result: 0.8000
+INFO 2024-08-31 15:08:46 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:08:46 - 6.75 seconds Passed...
+INFO 2024-08-31 15:08:46 - 6.75 seconds Passed...
+INFO 2024-08-31 15:09:06 - best validation result: 0.7860
+INFO 2024-08-31 15:09:06 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:09:55 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:09:55 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:10:02 - best validation result: 0.8000
+INFO 2024-08-31 15:10:02 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:10:02 - 7.21 seconds Passed...
+INFO 2024-08-31 15:10:02 - 7.22 seconds Passed...
+INFO 2024-08-31 15:10:21 - best validation result: 0.7860
+INFO 2024-08-31 15:10:21 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:12:00 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:12:00 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:12:07 - best validation result: 0.8000
+INFO 2024-08-31 15:12:07 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:12:07 - 7.31 seconds Passed...
+INFO 2024-08-31 15:12:07 - 7.31 seconds Passed...
+INFO 2024-08-31 15:12:27 - best validation result: 0.7860
+INFO 2024-08-31 15:12:27 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:13:50 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:13:50 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:13:57 - best validation result: 0.8000
+INFO 2024-08-31 15:13:57 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:13:57 - 7.46 seconds Passed...
+INFO 2024-08-31 15:13:57 - 7.46 seconds Passed...
+INFO 2024-08-31 15:14:16 - best validation result: 0.7860
+INFO 2024-08-31 15:14:16 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:14:16 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 15:14:16 - 26.39 seconds Passed...
+INFO 2024-08-31 15:14:27 - best validation result: 0.7680
+INFO 2024-08-31 15:14:27 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 15:14:27 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 15:14:27 - 37.66 seconds Passed...
+INFO 2024-08-31 15:14:47 - best validation result: 0.7960
+INFO 2024-08-31 15:14:47 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 15:14:47 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 15:14:47 - 58.01 seconds Passed...
+INFO 2024-08-31 15:15:16 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:15:16 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:15:23 - best validation result: 0.8000
+INFO 2024-08-31 15:15:23 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:15:23 - 7.62 seconds Passed...
+INFO 2024-08-31 15:15:23 - 7.63 seconds Passed...
+INFO 2024-08-31 15:15:43 - best validation result: 0.7860
+INFO 2024-08-31 15:15:43 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:15:43 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 15:15:43 - 26.94 seconds Passed...
+INFO 2024-08-31 15:15:53 - best validation result: 0.7680
+INFO 2024-08-31 15:15:53 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 15:15:53 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 15:15:53 - 37.62 seconds Passed...
+INFO 2024-08-31 15:16:13 - best validation result: 0.7960
+INFO 2024-08-31 15:16:13 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 15:16:13 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 15:16:13 - 57.20 seconds Passed...
+INFO 2024-08-31 15:53:53 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 15:53:53 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 15:54:00 - best validation result: 0.8000
+INFO 2024-08-31 15:54:00 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 15:54:00 - 6.84 seconds Passed...
+INFO 2024-08-31 15:54:00 - 6.84 seconds Passed...
+INFO 2024-08-31 15:54:20 - best validation result: 0.7860
+INFO 2024-08-31 15:54:20 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 15:54:20 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 15:54:20 - 26.28 seconds Passed...
+INFO 2024-08-31 15:54:30 - best validation result: 0.7680
+INFO 2024-08-31 15:54:30 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 15:54:30 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 15:54:30 - 36.90 seconds Passed...
+INFO 2024-08-31 15:54:50 - best validation result: 0.7960
+INFO 2024-08-31 15:54:50 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 15:54:50 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 15:54:50 - 56.45 seconds Passed...
+INFO 2024-08-31 15:55:10 - best validation result: 0.7780
+INFO 2024-08-31 15:55:10 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 15:55:10 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 15:55:10 - 76.71 seconds Passed...
+INFO 2024-08-31 15:55:31 - best validation result: 0.7820
+INFO 2024-08-31 15:55:31 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 15:55:31 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 15:55:31 - 97.61 seconds Passed...
+INFO 2024-08-31 17:00:13 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 17:00:13 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 17:00:20 - best validation result: 0.8000
+INFO 2024-08-31 17:00:20 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 17:00:20 - 7.11 seconds Passed...
+INFO 2024-08-31 17:00:20 - 7.11 seconds Passed...
+INFO 2024-08-31 17:00:40 - best validation result: 0.7860
+INFO 2024-08-31 17:00:40 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 17:00:40 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 17:00:40 - 26.90 seconds Passed...
+INFO 2024-08-31 17:00:51 - best validation result: 0.7680
+INFO 2024-08-31 17:00:51 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 17:00:51 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 17:00:51 - 38.27 seconds Passed...
+INFO 2024-08-31 17:01:21 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 17:01:21 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 17:01:28 - best validation result: 0.8000
+INFO 2024-08-31 17:01:28 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 17:01:28 - 6.99 seconds Passed...
+INFO 2024-08-31 17:01:28 - 6.99 seconds Passed...
+INFO 2024-08-31 17:01:48 - best validation result: 0.7860
+INFO 2024-08-31 17:01:48 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 17:01:48 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 17:01:48 - 26.19 seconds Passed...
+INFO 2024-08-31 17:01:59 - best validation result: 0.7680
+INFO 2024-08-31 17:01:59 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 17:01:59 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 17:01:59 - 37.27 seconds Passed...
+INFO 2024-08-31 17:02:18 - best validation result: 0.7960
+INFO 2024-08-31 17:02:18 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 17:02:18 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 17:02:18 - 57.01 seconds Passed...
+INFO 2024-08-31 17:02:39 - best validation result: 0.7780
+INFO 2024-08-31 17:02:39 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 17:02:39 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 17:02:39 - 77.51 seconds Passed...
+INFO 2024-08-31 18:25:21 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 18:25:21 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 18:25:28 - best validation result: 0.8000
+INFO 2024-08-31 18:25:28 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 18:25:28 - 6.95 seconds Passed...
+INFO 2024-08-31 18:25:28 - 6.95 seconds Passed...
+INFO 2024-08-31 18:25:47 - best validation result: 0.7860
+INFO 2024-08-31 18:25:47 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 18:26:42 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 18:26:42 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 18:26:50 - best validation result: 0.8000
+INFO 2024-08-31 18:26:50 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 18:26:50 - 7.76 seconds Passed...
+INFO 2024-08-31 18:26:50 - 7.76 seconds Passed...
+INFO 2024-08-31 18:27:10 - best validation result: 0.7860
+INFO 2024-08-31 18:27:10 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 18:28:04 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-08-31 18:28:04 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-08-31 18:28:13 - best validation result: 0.8000
+INFO 2024-08-31 18:28:13 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-08-31 18:28:13 - 9.18 seconds Passed...
+INFO 2024-08-31 18:28:13 - 9.18 seconds Passed...
+INFO 2024-08-31 18:28:39 - best validation result: 0.7860
+INFO 2024-08-31 18:28:39 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-08-31 18:28:39 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-08-31 18:28:39 - 35.08 seconds Passed...
+INFO 2024-08-31 18:28:52 - best validation result: 0.7680
+INFO 2024-08-31 18:28:52 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-08-31 18:28:52 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-08-31 18:28:52 - 47.58 seconds Passed...
+INFO 2024-08-31 18:29:12 - best validation result: 0.7960
+INFO 2024-08-31 18:29:12 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-08-31 18:29:12 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-08-31 18:29:12 - 67.34 seconds Passed...
+INFO 2024-08-31 18:29:31 - best validation result: 0.7780
+INFO 2024-08-31 18:29:31 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-08-31 18:29:31 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-08-31 18:29:31 - 87.20 seconds Passed...
+INFO 2024-08-31 18:29:52 - best validation result: 0.7820
+INFO 2024-08-31 18:29:52 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-08-31 18:29:52 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-08-31 18:29:52 - 107.92 seconds Passed...
+INFO 2024-08-31 18:30:07 - best validation result: 0.7800
+INFO 2024-08-31 18:30:07 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-08-31 18:30:07 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-08-31 18:30:07 - 122.45 seconds Passed...
+INFO 2024-08-31 18:30:28 - best validation result: 0.7960
+INFO 2024-08-31 18:30:28 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-08-31 18:30:28 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 18:30:28 - 143.95 seconds Passed...
+INFO 2024-08-31 18:30:41 - best validation result: 0.8000
+INFO 2024-08-31 18:30:41 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-08-31 18:30:41 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-08-31 18:30:41 - 157.01 seconds Passed...
+INFO 2024-08-31 18:30:55 - best validation result: 0.8020
+INFO 2024-08-31 18:30:55 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-08-31 18:30:55 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-08-31 18:30:55 - 170.98 seconds Passed...
+INFO 2024-08-31 18:31:06 - best validation result: 0.8000
+INFO 2024-08-31 18:31:06 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-08-31 18:31:06 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-08-31 18:31:06 - 181.92 seconds Passed...
+INFO 2024-08-31 18:31:18 - best validation result: 0.8060
+INFO 2024-08-31 18:31:18 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-08-31 18:31:18 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-08-31 18:31:18 - 193.49 seconds Passed...
+INFO 2024-08-31 18:31:32 - best validation result: 0.8100
+INFO 2024-08-31 18:31:32 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-08-31 18:31:32 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 18:31:32 - 207.90 seconds Passed...
+INFO 2024-08-31 18:31:46 - best validation result: 0.8140
+INFO 2024-08-31 18:31:46 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-08-31 18:31:46 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-08-31 18:31:46 - 221.91 seconds Passed...
+INFO 2024-08-31 18:31:55 - best validation result: 0.8100
+INFO 2024-08-31 18:31:55 - Test set results: loss= 0.8461, accuracy= 0.8290
+INFO 2024-08-31 18:31:55 - itr 13 summary: added 100 pl labels with confidence 0.69058, pl_acc: 84.0, consistency 1.00000, 1400 pl labels in total, test_acc: 0.8290
+INFO 2024-08-31 18:31:55 - 230.53 seconds Passed...
+INFO 2024-08-31 18:32:06 - best validation result: 0.8120
+INFO 2024-08-31 18:32:06 - Test set results: loss= 0.6563, accuracy= 0.8350
+INFO 2024-08-31 18:32:06 - itr 14 summary: added 100 pl labels with confidence 0.62800, pl_acc: 81.0, consistency 1.00000, 1500 pl labels in total, test_acc: 0.8350
+INFO 2024-08-31 18:32:06 - 241.63 seconds Passed...
+INFO 2024-08-31 18:32:20 - best validation result: 0.8140
+INFO 2024-08-31 18:32:20 - Test set results: loss= 0.5812, accuracy= 0.8320
+INFO 2024-08-31 18:32:20 - itr 15 summary: added 100 pl labels with confidence 0.56777, pl_acc: 83.0, consistency 1.00000, 1600 pl labels in total, test_acc: 0.8320
+INFO 2024-08-31 18:32:20 - 255.58 seconds Passed...
+INFO 2024-08-31 18:32:31 - best validation result: 0.8180
+INFO 2024-08-31 18:32:31 - Test set results: loss= 0.6192, accuracy= 0.8370
+INFO 2024-08-31 18:32:31 - itr 16 summary: added 100 pl labels with confidence 0.50925, pl_acc: 72.0, consistency 1.00000, 1700 pl labels in total, test_acc: 0.8370
+INFO 2024-08-31 18:32:31 - 267.21 seconds Passed...
+INFO 2024-08-31 18:32:43 - best validation result: 0.8140
+INFO 2024-08-31 18:32:43 - Test set results: loss= 0.6601, accuracy= 0.8340
+INFO 2024-08-31 18:32:43 - itr 17 summary: added 100 pl labels with confidence 0.44229, pl_acc: 67.0, consistency 1.00000, 1800 pl labels in total, test_acc: 0.8340
+INFO 2024-08-31 18:32:43 - 278.41 seconds Passed...
+INFO 2024-08-31 18:32:52 - best validation result: 0.8100
+INFO 2024-08-31 18:32:52 - Test set results: loss= 0.7592, accuracy= 0.8240
+INFO 2024-08-31 18:32:52 - itr 18 summary: added 100 pl labels with confidence 0.39452, pl_acc: 74.0, consistency 1.00000, 1900 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 18:32:52 - 287.99 seconds Passed...
+INFO 2024-08-31 18:33:03 - best validation result: 0.8160
+INFO 2024-08-31 18:33:03 - Test set results: loss= 0.7293, accuracy= 0.8340
+INFO 2024-08-31 18:33:03 - itr 19 summary: added 100 pl labels with confidence 0.33610, pl_acc: 75.0, consistency 1.00000, 2000 pl labels in total, test_acc: 0.8340
+INFO 2024-08-31 18:33:03 - 298.47 seconds Passed...
+INFO 2024-08-31 18:33:13 - best validation result: 0.8160
+INFO 2024-08-31 18:33:13 - Test set results: loss= 0.7430, accuracy= 0.8240
+INFO 2024-08-31 18:33:13 - itr 20 summary: added 100 pl labels with confidence 0.28503, pl_acc: 65.0, consistency 1.00000, 2100 pl labels in total, test_acc: 0.8240
+INFO 2024-08-31 18:33:13 - 308.60 seconds Passed...
+INFO 2024-08-31 18:33:24 - best validation result: 0.8140
+INFO 2024-08-31 18:33:24 - Test set results: loss= 0.7391, accuracy= 0.8270
+INFO 2024-08-31 18:33:24 - itr 21 summary: added 100 pl labels with confidence 0.24380, pl_acc: 64.0, consistency 1.00000, 2200 pl labels in total, test_acc: 0.8270
+INFO 2024-08-31 18:33:24 - 319.38 seconds Passed...
+INFO 2024-08-31 18:33:34 - best validation result: 0.8200
+INFO 2024-08-31 18:33:34 - Test set results: loss= 0.7183, accuracy= 0.8250
+INFO 2024-08-31 18:33:34 - itr 22 summary: added 100 pl labels with confidence 0.20785, pl_acc: 69.0, consistency 1.00000, 2300 pl labels in total, test_acc: 0.8250
+INFO 2024-08-31 18:33:34 - 329.44 seconds Passed...
+INFO 2024-08-31 18:33:44 - best validation result: 0.8200
+INFO 2024-08-31 18:33:44 - Test set results: loss= 0.7692, accuracy= 0.8250
+INFO 2024-08-31 18:33:44 - itr 23 summary: added 100 pl labels with confidence 0.17433, pl_acc: 61.0, consistency 1.00000, 2400 pl labels in total, test_acc: 0.8250
+INFO 2024-08-31 18:33:44 - 339.36 seconds Passed...
+INFO 2024-08-31 18:33:53 - best validation result: 0.8180
+INFO 2024-08-31 18:33:53 - Test set results: loss= 0.7628, accuracy= 0.8270
+INFO 2024-08-31 18:33:53 - itr 24 summary: added 168 pl labels with confidence 0.14772, pl_acc: 57.14285714285714, consistency 1.00000, 2568 pl labels in total, test_acc: 0.8270
+INFO 2024-08-31 18:33:53 - 349.06 seconds Passed...
+INFO 2024-08-31 18:33:55 - original acc: 0.80500, best test accuracy: 0.83700, final test accuracy: 0.82700, consistency: 1, pl_acc: 0.86
+INFO 2024-08-31 18:33:55 - Best Acc Early Stopped by Valid Acc: 0.82500
+INFO 2024-08-31 18:33:55 - Confidence avg time: 0.79070, Selection avg time: 0.52977, Retraining avg time: 12.28134
+INFO 2024-09-08 20:25:38 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 20:25:38 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 20:25:45 - best validation result: 0.8000
+INFO 2024-09-08 20:25:45 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-09-08 20:25:45 - 7.01 seconds Passed...
+INFO 2024-09-08 20:25:45 - 7.02 seconds Passed...
+INFO 2024-09-08 20:26:05 - best validation result: 0.7860
+INFO 2024-09-08 20:26:05 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-09-08 20:27:15 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 20:27:15 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 20:27:22 - best validation result: 0.8000
+INFO 2024-09-08 20:27:22 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-09-08 20:27:22 - 6.92 seconds Passed...
+INFO 2024-09-08 20:27:22 - 6.93 seconds Passed...
+INFO 2024-09-08 20:27:41 - best validation result: 0.7860
+INFO 2024-09-08 20:27:41 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-09-08 20:28:03 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 20:28:03 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 20:28:10 - best validation result: 0.8000
+INFO 2024-09-08 20:28:10 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-09-08 20:28:10 - 7.19 seconds Passed...
+INFO 2024-09-08 20:28:10 - 7.20 seconds Passed...
+INFO 2024-09-08 20:28:30 - best validation result: 0.7860
+INFO 2024-09-08 20:28:30 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-09-08 20:28:30 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-09-08 20:28:30 - 26.84 seconds Passed...
+INFO 2024-09-08 20:28:41 - best validation result: 0.7680
+INFO 2024-09-08 20:28:41 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-09-08 20:28:41 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-09-08 20:28:41 - 38.47 seconds Passed...
+INFO 2024-09-08 20:29:02 - best validation result: 0.7960
+INFO 2024-09-08 20:29:02 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-09-08 20:29:02 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-09-08 20:29:02 - 59.22 seconds Passed...
+INFO 2024-09-08 20:29:23 - best validation result: 0.7780
+INFO 2024-09-08 20:29:23 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-09-08 20:29:23 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-09-08 20:29:23 - 79.91 seconds Passed...
+INFO 2024-09-08 20:29:43 - best validation result: 0.7820
+INFO 2024-09-08 20:29:43 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-09-08 20:29:43 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-09-08 20:29:43 - 99.81 seconds Passed...
+INFO 2024-09-08 20:29:57 - best validation result: 0.7800
+INFO 2024-09-08 20:29:57 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-09-08 20:29:57 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-09-08 20:29:57 - 114.04 seconds Passed...
+INFO 2024-09-08 20:30:17 - best validation result: 0.7960
+INFO 2024-09-08 20:30:17 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-09-08 20:30:17 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 20:30:17 - 134.06 seconds Passed...
+INFO 2024-09-08 20:30:30 - best validation result: 0.8000
+INFO 2024-09-08 20:30:30 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-09-08 20:30:30 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-09-08 20:30:30 - 147.39 seconds Passed...
+INFO 2024-09-08 20:30:44 - best validation result: 0.8020
+INFO 2024-09-08 20:30:44 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-09-08 20:30:44 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 20:30:44 - 160.78 seconds Passed...
+INFO 2024-09-08 20:30:55 - best validation result: 0.8000
+INFO 2024-09-08 20:30:55 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-09-08 20:30:55 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-09-08 20:30:55 - 171.88 seconds Passed...
+INFO 2024-09-08 20:31:06 - best validation result: 0.8060
+INFO 2024-09-08 20:31:06 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-09-08 20:31:06 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-09-08 20:31:06 - 183.49 seconds Passed...
+INFO 2024-09-08 20:31:21 - best validation result: 0.8100
+INFO 2024-09-08 20:31:21 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-09-08 20:31:21 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:31:21 - 197.92 seconds Passed...
+INFO 2024-09-08 20:31:35 - best validation result: 0.8140
+INFO 2024-09-08 20:31:35 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-09-08 20:31:35 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 20:31:35 - 212.08 seconds Passed...
+INFO 2024-09-08 20:31:44 - best validation result: 0.8100
+INFO 2024-09-08 20:31:44 - Test set results: loss= 0.8461, accuracy= 0.8290
+INFO 2024-09-08 20:31:44 - itr 13 summary: added 100 pl labels with confidence 0.69058, pl_acc: 84.0, consistency 1.00000, 1400 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 20:31:44 - 221.10 seconds Passed...
+INFO 2024-09-08 20:31:55 - best validation result: 0.8120
+INFO 2024-09-08 20:31:55 - Test set results: loss= 0.6563, accuracy= 0.8350
+INFO 2024-09-08 20:31:55 - itr 14 summary: added 100 pl labels with confidence 0.62800, pl_acc: 81.0, consistency 1.00000, 1500 pl labels in total, test_acc: 0.8350
+INFO 2024-09-08 20:31:55 - 232.71 seconds Passed...
+INFO 2024-09-08 20:32:11 - best validation result: 0.8140
+INFO 2024-09-08 20:32:11 - Test set results: loss= 0.5812, accuracy= 0.8320
+INFO 2024-09-08 20:32:11 - itr 15 summary: added 100 pl labels with confidence 0.56777, pl_acc: 83.0, consistency 1.00000, 1600 pl labels in total, test_acc: 0.8320
+INFO 2024-09-08 20:32:11 - 247.73 seconds Passed...
+INFO 2024-09-08 20:32:23 - best validation result: 0.8180
+INFO 2024-09-08 20:32:23 - Test set results: loss= 0.6192, accuracy= 0.8370
+INFO 2024-09-08 20:32:23 - itr 16 summary: added 100 pl labels with confidence 0.50925, pl_acc: 72.0, consistency 1.00000, 1700 pl labels in total, test_acc: 0.8370
+INFO 2024-09-08 20:32:23 - 260.04 seconds Passed...
+INFO 2024-09-08 20:32:34 - best validation result: 0.8140
+INFO 2024-09-08 20:32:34 - Test set results: loss= 0.6601, accuracy= 0.8340
+INFO 2024-09-08 20:32:34 - itr 17 summary: added 100 pl labels with confidence 0.44229, pl_acc: 67.0, consistency 1.00000, 1800 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 20:32:34 - 270.83 seconds Passed...
+INFO 2024-09-08 20:32:43 - best validation result: 0.8100
+INFO 2024-09-08 20:32:43 - Test set results: loss= 0.7592, accuracy= 0.8240
+INFO 2024-09-08 20:32:43 - itr 18 summary: added 100 pl labels with confidence 0.39452, pl_acc: 74.0, consistency 1.00000, 1900 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:32:43 - 280.45 seconds Passed...
+INFO 2024-09-08 20:32:53 - best validation result: 0.8160
+INFO 2024-09-08 20:32:53 - Test set results: loss= 0.7293, accuracy= 0.8340
+INFO 2024-09-08 20:32:53 - itr 19 summary: added 100 pl labels with confidence 0.33610, pl_acc: 75.0, consistency 1.00000, 2000 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 20:32:53 - 290.55 seconds Passed...
+INFO 2024-09-08 20:33:03 - best validation result: 0.8160
+INFO 2024-09-08 20:33:03 - Test set results: loss= 0.7430, accuracy= 0.8240
+INFO 2024-09-08 20:33:03 - itr 20 summary: added 100 pl labels with confidence 0.28503, pl_acc: 65.0, consistency 1.00000, 2100 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:33:03 - 300.57 seconds Passed...
+INFO 2024-09-08 20:33:13 - best validation result: 0.8140
+INFO 2024-09-08 20:33:13 - Test set results: loss= 0.7391, accuracy= 0.8270
+INFO 2024-09-08 20:33:13 - itr 21 summary: added 100 pl labels with confidence 0.24380, pl_acc: 64.0, consistency 1.00000, 2200 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 20:33:13 - 310.39 seconds Passed...
+INFO 2024-09-08 20:33:24 - best validation result: 0.8200
+INFO 2024-09-08 20:33:24 - Test set results: loss= 0.7183, accuracy= 0.8250
+INFO 2024-09-08 20:33:24 - itr 22 summary: added 100 pl labels with confidence 0.20785, pl_acc: 69.0, consistency 1.00000, 2300 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 20:33:24 - 320.72 seconds Passed...
+INFO 2024-09-08 20:33:34 - best validation result: 0.8200
+INFO 2024-09-08 20:33:34 - Test set results: loss= 0.7692, accuracy= 0.8250
+INFO 2024-09-08 20:33:34 - itr 23 summary: added 100 pl labels with confidence 0.17433, pl_acc: 61.0, consistency 1.00000, 2400 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 20:33:34 - 331.34 seconds Passed...
+INFO 2024-09-08 20:33:45 - best validation result: 0.8180
+INFO 2024-09-08 20:33:45 - Test set results: loss= 0.7628, accuracy= 0.8270
+INFO 2024-09-08 20:33:45 - itr 24 summary: added 168 pl labels with confidence 0.14772, pl_acc: 57.14285714285714, consistency 1.00000, 2568 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 20:33:45 - 342.04 seconds Passed...
+INFO 2024-09-08 20:33:46 - original acc: 0.80500, best test accuracy: 0.83700, final test accuracy: 0.82700, consistency: 1, pl_acc: 0.86
+INFO 2024-09-08 20:33:46 - Best Acc Early Stopped by Valid Acc: 0.82500
+INFO 2024-09-08 20:33:46 - Confidence avg time: 0.80427, Selection avg time: 0.54425, Retraining avg time: 12.05577
+INFO 2024-09-08 20:44:06 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 20:44:06 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 20:44:13 - best validation result: 0.8000
+INFO 2024-09-08 20:44:13 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-09-08 20:44:13 - 7.23 seconds Passed...
+INFO 2024-09-08 20:44:13 - 7.23 seconds Passed...
+INFO 2024-09-08 20:44:32 - best validation result: 0.7860
+INFO 2024-09-08 20:44:32 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-09-08 20:44:32 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-09-08 20:44:32 - 26.32 seconds Passed...
+INFO 2024-09-08 20:44:43 - best validation result: 0.7680
+INFO 2024-09-08 20:44:43 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-09-08 20:44:43 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-09-08 20:44:43 - 37.35 seconds Passed...
+INFO 2024-09-08 20:45:03 - best validation result: 0.7960
+INFO 2024-09-08 20:45:03 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-09-08 20:45:03 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-09-08 20:45:03 - 57.17 seconds Passed...
+INFO 2024-09-08 20:45:23 - best validation result: 0.7780
+INFO 2024-09-08 20:45:23 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-09-08 20:45:23 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-09-08 20:45:23 - 77.15 seconds Passed...
+INFO 2024-09-08 20:45:44 - best validation result: 0.7820
+INFO 2024-09-08 20:45:44 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-09-08 20:45:44 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-09-08 20:45:44 - 98.29 seconds Passed...
+INFO 2024-09-08 20:45:59 - best validation result: 0.7800
+INFO 2024-09-08 20:45:59 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-09-08 20:45:59 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-09-08 20:45:59 - 112.95 seconds Passed...
+INFO 2024-09-08 20:46:20 - best validation result: 0.7960
+INFO 2024-09-08 20:46:20 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-09-08 20:46:20 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 20:46:20 - 134.55 seconds Passed...
+INFO 2024-09-08 20:46:35 - best validation result: 0.8000
+INFO 2024-09-08 20:46:35 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-09-08 20:46:35 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-09-08 20:46:35 - 148.96 seconds Passed...
+INFO 2024-09-08 20:46:47 - best validation result: 0.8020
+INFO 2024-09-08 20:46:47 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-09-08 20:46:47 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 20:46:47 - 161.43 seconds Passed...
+INFO 2024-09-08 20:46:58 - best validation result: 0.8000
+INFO 2024-09-08 20:46:58 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-09-08 20:46:58 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-09-08 20:46:58 - 171.86 seconds Passed...
+INFO 2024-09-08 20:47:09 - best validation result: 0.8060
+INFO 2024-09-08 20:47:09 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-09-08 20:47:09 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-09-08 20:47:09 - 183.08 seconds Passed...
+INFO 2024-09-08 20:47:23 - best validation result: 0.8100
+INFO 2024-09-08 20:47:23 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-09-08 20:47:23 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:47:23 - 196.72 seconds Passed...
+INFO 2024-09-08 20:47:37 - best validation result: 0.8140
+INFO 2024-09-08 20:47:37 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-09-08 20:47:37 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 20:47:37 - 210.69 seconds Passed...
+INFO 2024-09-08 20:47:46 - best validation result: 0.8100
+INFO 2024-09-08 20:47:46 - Test set results: loss= 0.8461, accuracy= 0.8290
+INFO 2024-09-08 20:47:46 - itr 13 summary: added 100 pl labels with confidence 0.69058, pl_acc: 84.0, consistency 1.00000, 1400 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 20:47:46 - 219.91 seconds Passed...
+INFO 2024-09-08 20:47:57 - best validation result: 0.8120
+INFO 2024-09-08 20:47:57 - Test set results: loss= 0.6563, accuracy= 0.8350
+INFO 2024-09-08 20:47:57 - itr 14 summary: added 100 pl labels with confidence 0.62800, pl_acc: 81.0, consistency 1.00000, 1500 pl labels in total, test_acc: 0.8350
+INFO 2024-09-08 20:47:57 - 231.14 seconds Passed...
+INFO 2024-09-08 20:48:12 - best validation result: 0.8140
+INFO 2024-09-08 20:48:12 - Test set results: loss= 0.5812, accuracy= 0.8320
+INFO 2024-09-08 20:48:12 - itr 15 summary: added 100 pl labels with confidence 0.56777, pl_acc: 83.0, consistency 1.00000, 1600 pl labels in total, test_acc: 0.8320
+INFO 2024-09-08 20:48:12 - 246.54 seconds Passed...
+INFO 2024-09-08 20:48:24 - best validation result: 0.8180
+INFO 2024-09-08 20:48:24 - Test set results: loss= 0.6192, accuracy= 0.8370
+INFO 2024-09-08 20:48:24 - itr 16 summary: added 100 pl labels with confidence 0.50925, pl_acc: 72.0, consistency 1.00000, 1700 pl labels in total, test_acc: 0.8370
+INFO 2024-09-08 20:48:24 - 257.94 seconds Passed...
+INFO 2024-09-08 20:48:34 - best validation result: 0.8140
+INFO 2024-09-08 20:48:34 - Test set results: loss= 0.6601, accuracy= 0.8340
+INFO 2024-09-08 20:48:34 - itr 17 summary: added 100 pl labels with confidence 0.44229, pl_acc: 67.0, consistency 1.00000, 1800 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 20:48:34 - 268.57 seconds Passed...
+INFO 2024-09-08 20:48:44 - best validation result: 0.8100
+INFO 2024-09-08 20:48:44 - Test set results: loss= 0.7592, accuracy= 0.8240
+INFO 2024-09-08 20:48:44 - itr 18 summary: added 100 pl labels with confidence 0.39452, pl_acc: 74.0, consistency 1.00000, 1900 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:48:44 - 278.05 seconds Passed...
+INFO 2024-09-08 20:48:54 - best validation result: 0.8160
+INFO 2024-09-08 20:48:54 - Test set results: loss= 0.7293, accuracy= 0.8340
+INFO 2024-09-08 20:48:54 - itr 19 summary: added 100 pl labels with confidence 0.33610, pl_acc: 75.0, consistency 1.00000, 2000 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 20:48:54 - 287.94 seconds Passed...
+INFO 2024-09-08 20:49:04 - best validation result: 0.8160
+INFO 2024-09-08 20:49:04 - Test set results: loss= 0.7430, accuracy= 0.8240
+INFO 2024-09-08 20:49:04 - itr 20 summary: added 100 pl labels with confidence 0.28503, pl_acc: 65.0, consistency 1.00000, 2100 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 20:49:04 - 298.10 seconds Passed...
+INFO 2024-09-08 20:49:14 - best validation result: 0.8140
+INFO 2024-09-08 20:49:14 - Test set results: loss= 0.7391, accuracy= 0.8270
+INFO 2024-09-08 20:49:14 - itr 21 summary: added 100 pl labels with confidence 0.24380, pl_acc: 64.0, consistency 1.00000, 2200 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 20:49:14 - 308.60 seconds Passed...
+INFO 2024-09-08 20:49:25 - best validation result: 0.8200
+INFO 2024-09-08 20:49:25 - Test set results: loss= 0.7183, accuracy= 0.8250
+INFO 2024-09-08 20:49:25 - itr 22 summary: added 100 pl labels with confidence 0.20785, pl_acc: 69.0, consistency 1.00000, 2300 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 20:49:25 - 318.71 seconds Passed...
+INFO 2024-09-08 20:49:34 - best validation result: 0.8200
+INFO 2024-09-08 20:49:34 - Test set results: loss= 0.7692, accuracy= 0.8250
+INFO 2024-09-08 20:49:34 - itr 23 summary: added 100 pl labels with confidence 0.17433, pl_acc: 61.0, consistency 1.00000, 2400 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 20:49:34 - 328.50 seconds Passed...
+INFO 2024-09-08 20:49:44 - best validation result: 0.8180
+INFO 2024-09-08 20:49:44 - Test set results: loss= 0.7628, accuracy= 0.8270
+INFO 2024-09-08 20:49:44 - itr 24 summary: added 168 pl labels with confidence 0.14772, pl_acc: 57.14285714285714, consistency 1.00000, 2568 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 20:49:44 - 337.85 seconds Passed...
+INFO 2024-09-08 20:49:45 - original acc: 0.80500, best test accuracy: 0.83700, final test accuracy: 0.82700, consistency: 1, pl_acc: 0.86
+INFO 2024-09-08 20:49:45 - Best Acc Early Stopped by Valid Acc: 0.82500
+INFO 2024-09-08 20:49:45 - Confidence avg time: 0.74602, Selection avg time: 0.51761, Retraining avg time: 11.96920
+INFO 2024-09-08 21:27:36 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 21:27:36 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 21:29:39 - model: GCN, dataset: Cora, Noisy_portion: 0.0, N_node: 2708, N_class: 7, Method: IGP, threshold: 0, seed: 813
+INFO 2024-09-08 21:29:39 - idx_train: 140, idx_val: 500 , idx_test: 1000
+INFO 2024-09-08 21:29:46 - best validation result: 0.8000
+INFO 2024-09-08 21:29:46 - Test set results: loss= 1.0872, accuracy= 0.8050
+INFO 2024-09-08 21:29:46 - 6.96 seconds Passed...
+INFO 2024-09-08 21:29:46 - 6.96 seconds Passed...
+INFO 2024-09-08 21:30:07 - best validation result: 0.7860
+INFO 2024-09-08 21:30:07 - Test set results: loss= 0.7478, accuracy= 0.7990
+INFO 2024-09-08 21:30:07 - itr 0 summary: added 100 pl labels with confidence 1.00000, pl_acc: 93.0, consistency 1.00000, 100 pl labels in total, test_acc: 0.7990
+INFO 2024-09-08 21:30:07 - 27.57 seconds Passed...
+INFO 2024-09-08 21:30:18 - best validation result: 0.7680
+INFO 2024-09-08 21:30:18 - Test set results: loss= 0.8949, accuracy= 0.7700
+INFO 2024-09-08 21:30:18 - itr 1 summary: added 100 pl labels with confidence 0.99999, pl_acc: 92.0, consistency 1.00000, 200 pl labels in total, test_acc: 0.7700
+INFO 2024-09-08 21:30:18 - 38.96 seconds Passed...
+INFO 2024-09-08 21:30:39 - best validation result: 0.7960
+INFO 2024-09-08 21:30:39 - Test set results: loss= 0.7321, accuracy= 0.8050
+INFO 2024-09-08 21:30:39 - itr 2 summary: added 100 pl labels with confidence 0.99979, pl_acc: 95.0, consistency 1.00000, 300 pl labels in total, test_acc: 0.8050
+INFO 2024-09-08 21:30:39 - 59.72 seconds Passed...
+INFO 2024-09-08 21:35:01 - best validation result: 0.7780
+INFO 2024-09-08 21:35:01 - Test set results: loss= 0.7113, accuracy= 0.7980
+INFO 2024-09-08 21:35:01 - itr 3 summary: added 100 pl labels with confidence 0.99854, pl_acc: 92.0, consistency 1.00000, 400 pl labels in total, test_acc: 0.7980
+INFO 2024-09-08 21:35:01 - 321.73 seconds Passed...
+INFO 2024-09-08 21:35:51 - best validation result: 0.7820
+INFO 2024-09-08 21:35:51 - Test set results: loss= 0.6851, accuracy= 0.7920
+INFO 2024-09-08 21:35:51 - itr 4 summary: added 100 pl labels with confidence 0.99612, pl_acc: 97.0, consistency 1.00000, 500 pl labels in total, test_acc: 0.7920
+INFO 2024-09-08 21:35:51 - 371.53 seconds Passed...
+INFO 2024-09-08 21:36:06 - best validation result: 0.7800
+INFO 2024-09-08 21:36:06 - Test set results: loss= 0.6923, accuracy= 0.7930
+INFO 2024-09-08 21:36:06 - itr 5 summary: added 100 pl labels with confidence 0.99042, pl_acc: 82.0, consistency 1.00000, 600 pl labels in total, test_acc: 0.7930
+INFO 2024-09-08 21:36:06 - 386.45 seconds Passed...
+INFO 2024-09-08 21:36:27 - best validation result: 0.7960
+INFO 2024-09-08 21:36:27 - Test set results: loss= 0.6456, accuracy= 0.8170
+INFO 2024-09-08 21:36:27 - itr 6 summary: added 100 pl labels with confidence 0.97900, pl_acc: 85.0, consistency 1.00000, 700 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 21:36:27 - 407.29 seconds Passed...
+INFO 2024-09-08 21:36:40 - best validation result: 0.8000
+INFO 2024-09-08 21:36:40 - Test set results: loss= 0.6767, accuracy= 0.8210
+INFO 2024-09-08 21:36:40 - itr 7 summary: added 100 pl labels with confidence 0.95866, pl_acc: 86.0, consistency 1.00000, 800 pl labels in total, test_acc: 0.8210
+INFO 2024-09-08 21:36:40 - 420.89 seconds Passed...
+INFO 2024-09-08 21:36:54 - best validation result: 0.8020
+INFO 2024-09-08 21:36:54 - Test set results: loss= 0.6565, accuracy= 0.8170
+INFO 2024-09-08 21:36:54 - itr 8 summary: added 100 pl labels with confidence 0.93130, pl_acc: 87.0, consistency 1.00000, 900 pl labels in total, test_acc: 0.8170
+INFO 2024-09-08 21:36:54 - 434.38 seconds Passed...
+INFO 2024-09-08 21:37:05 - best validation result: 0.8000
+INFO 2024-09-08 21:37:05 - Test set results: loss= 0.7051, accuracy= 0.8230
+INFO 2024-09-08 21:37:05 - itr 9 summary: added 100 pl labels with confidence 0.90145, pl_acc: 86.0, consistency 1.00000, 1000 pl labels in total, test_acc: 0.8230
+INFO 2024-09-08 21:37:05 - 445.37 seconds Passed...
+INFO 2024-09-08 21:37:16 - best validation result: 0.8060
+INFO 2024-09-08 21:37:16 - Test set results: loss= 0.6606, accuracy= 0.8190
+INFO 2024-09-08 21:37:16 - itr 10 summary: added 100 pl labels with confidence 0.86211, pl_acc: 79.0, consistency 1.00000, 1100 pl labels in total, test_acc: 0.8190
+INFO 2024-09-08 21:37:16 - 457.07 seconds Passed...
+INFO 2024-09-08 21:37:31 - best validation result: 0.8100
+INFO 2024-09-08 21:37:31 - Test set results: loss= 0.6106, accuracy= 0.8240
+INFO 2024-09-08 21:37:31 - itr 11 summary: added 100 pl labels with confidence 0.81691, pl_acc: 88.0, consistency 1.00000, 1200 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 21:37:31 - 472.11 seconds Passed...
+INFO 2024-09-08 21:37:46 - best validation result: 0.8140
+INFO 2024-09-08 21:37:46 - Test set results: loss= 0.6047, accuracy= 0.8290
+INFO 2024-09-08 21:37:46 - itr 12 summary: added 100 pl labels with confidence 0.76384, pl_acc: 80.0, consistency 1.00000, 1300 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 21:37:46 - 486.69 seconds Passed...
+INFO 2024-09-08 21:37:55 - best validation result: 0.8100
+INFO 2024-09-08 21:37:55 - Test set results: loss= 0.8461, accuracy= 0.8290
+INFO 2024-09-08 21:37:55 - itr 13 summary: added 100 pl labels with confidence 0.69058, pl_acc: 84.0, consistency 1.00000, 1400 pl labels in total, test_acc: 0.8290
+INFO 2024-09-08 21:37:55 - 495.83 seconds Passed...
+INFO 2024-09-08 21:38:07 - best validation result: 0.8120
+INFO 2024-09-08 21:38:07 - Test set results: loss= 0.6563, accuracy= 0.8350
+INFO 2024-09-08 21:38:07 - itr 14 summary: added 100 pl labels with confidence 0.62800, pl_acc: 81.0, consistency 1.00000, 1500 pl labels in total, test_acc: 0.8350
+INFO 2024-09-08 21:38:07 - 507.24 seconds Passed...
+INFO 2024-09-08 21:38:21 - best validation result: 0.8140
+INFO 2024-09-08 21:38:21 - Test set results: loss= 0.5812, accuracy= 0.8320
+INFO 2024-09-08 21:38:21 - itr 15 summary: added 100 pl labels with confidence 0.56777, pl_acc: 83.0, consistency 1.00000, 1600 pl labels in total, test_acc: 0.8320
+INFO 2024-09-08 21:38:21 - 522.11 seconds Passed...
+INFO 2024-09-08 21:38:33 - best validation result: 0.8180
+INFO 2024-09-08 21:38:33 - Test set results: loss= 0.6192, accuracy= 0.8370
+INFO 2024-09-08 21:38:33 - itr 16 summary: added 100 pl labels with confidence 0.50925, pl_acc: 72.0, consistency 1.00000, 1700 pl labels in total, test_acc: 0.8370
+INFO 2024-09-08 21:38:33 - 534.14 seconds Passed...
+INFO 2024-09-08 21:38:44 - best validation result: 0.8140
+INFO 2024-09-08 21:38:44 - Test set results: loss= 0.6601, accuracy= 0.8340
+INFO 2024-09-08 21:38:44 - itr 17 summary: added 100 pl labels with confidence 0.44229, pl_acc: 67.0, consistency 1.00000, 1800 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 21:38:44 - 545.05 seconds Passed...
+INFO 2024-09-08 21:38:54 - best validation result: 0.8100
+INFO 2024-09-08 21:38:54 - Test set results: loss= 0.7592, accuracy= 0.8240
+INFO 2024-09-08 21:38:54 - itr 18 summary: added 100 pl labels with confidence 0.39452, pl_acc: 74.0, consistency 1.00000, 1900 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 21:38:54 - 554.71 seconds Passed...
+INFO 2024-09-08 21:39:04 - best validation result: 0.8160
+INFO 2024-09-08 21:39:04 - Test set results: loss= 0.7293, accuracy= 0.8340
+INFO 2024-09-08 21:39:04 - itr 19 summary: added 100 pl labels with confidence 0.33610, pl_acc: 75.0, consistency 1.00000, 2000 pl labels in total, test_acc: 0.8340
+INFO 2024-09-08 21:39:04 - 564.50 seconds Passed...
+INFO 2024-09-08 21:39:13 - best validation result: 0.8160
+INFO 2024-09-08 21:39:13 - Test set results: loss= 0.7430, accuracy= 0.8240
+INFO 2024-09-08 21:39:13 - itr 20 summary: added 100 pl labels with confidence 0.28503, pl_acc: 65.0, consistency 1.00000, 2100 pl labels in total, test_acc: 0.8240
+INFO 2024-09-08 21:39:13 - 574.03 seconds Passed...
+INFO 2024-09-08 21:39:23 - best validation result: 0.8140
+INFO 2024-09-08 21:39:23 - Test set results: loss= 0.7391, accuracy= 0.8270
+INFO 2024-09-08 21:39:23 - itr 21 summary: added 100 pl labels with confidence 0.24380, pl_acc: 64.0, consistency 1.00000, 2200 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 21:39:23 - 584.06 seconds Passed...
+INFO 2024-09-08 21:39:34 - best validation result: 0.8200
+INFO 2024-09-08 21:39:34 - Test set results: loss= 0.7183, accuracy= 0.8250
+INFO 2024-09-08 21:39:34 - itr 22 summary: added 100 pl labels with confidence 0.20785, pl_acc: 69.0, consistency 1.00000, 2300 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 21:39:34 - 594.59 seconds Passed...
+INFO 2024-09-08 21:39:44 - best validation result: 0.8200
+INFO 2024-09-08 21:39:44 - Test set results: loss= 0.7692, accuracy= 0.8250
+INFO 2024-09-08 21:39:44 - itr 23 summary: added 100 pl labels with confidence 0.17433, pl_acc: 61.0, consistency 1.00000, 2400 pl labels in total, test_acc: 0.8250
+INFO 2024-09-08 21:39:44 - 604.32 seconds Passed...
+INFO 2024-09-08 21:39:53 - best validation result: 0.8180
+INFO 2024-09-08 21:39:53 - Test set results: loss= 0.7628, accuracy= 0.8270
+INFO 2024-09-08 21:39:53 - itr 24 summary: added 168 pl labels with confidence 0.14772, pl_acc: 57.14285714285714, consistency 1.00000, 2568 pl labels in total, test_acc: 0.8270
+INFO 2024-09-08 21:39:53 - 614.10 seconds Passed...
+INFO 2024-09-08 21:39:55 - original acc: 0.80500, best test accuracy: 0.83700, final test accuracy: 0.82700, consistency: 1, pl_acc: 0.86
+INFO 2024-09-08 21:39:55 - Best Acc Early Stopped by Valid Acc: 0.82500
+INFO 2024-09-08 21:39:55 - Confidence avg time: 9.40432, Selection avg time: 0.56877, Retraining avg time: 13.98058
