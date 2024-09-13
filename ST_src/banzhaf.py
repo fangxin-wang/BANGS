@@ -280,7 +280,8 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
     # confidence, pred_label = torch.max(y_probs, dim=1)
 
     num_class = y_probs.shape[1]
-    y_probs[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
+    # 9.12 test
+    # y_probs[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
     #print( 'y_probs', torch.max(y_probs), torch.min(y_probs))
 
     K = args.top

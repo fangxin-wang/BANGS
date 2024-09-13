@@ -104,6 +104,7 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
         output = torch.mm(output, T)
         sign = False
         loss_train = weighted_cross_entropy(output[idx_train], pseudo_labels[idx_train], bald[idx_train], args.beta, nclass, sign)
+
         # loss_train = criterion(output[idx_train], pseudo_labels[idx_train])
         acc_train = accuracy(output[idx_train], pseudo_labels[idx_train])
         loss_train.backward()
@@ -344,10 +345,14 @@ if __name__ == '__main__':
 
         if args.random_pick:
             print("===random_pick===")
-            idxes = torch.where(confidence > 0.)[0]
-            pl_idx = random.sample(idxes.tolist(), args.top)
-            pl_idx = torch.Tensor(pl_idx).long().to(device)
-            conf_score = confidence[pl_idx]
+            idxes = torch.where(confidence > 0.)[0].tolist()
+            if len(idxes) >= args.top:
+                pl_idx = random.sample(idxes, args.top)
+                pl_idx = torch.Tensor(pl_idx).long().to(device)
+                conf_score = confidence[pl_idx]
+            else:
+                pl_idx = []
+
 
         if args.conf_pick:
             print("===conf_pick===")
@@ -522,30 +527,11 @@ if __name__ == '__main__':
         print(T_conf[-1], T_select[-1], T_retrain[-1])
 
     print(ACC_LIST,ENT_LIST)
-    import numpy as np
-    import matplotlib.pyplot as plt
 
     ENT_DIFF = ENT_LIST[: -1]
     ACC_DIFF = np.diff(ACC_LIST)[: len(ENT_DIFF) ]
-    # Plot
-    fig, ax1 = plt.subplots(figsize=(8, 5))
 
-    # Accuracy line
-    ax1.set_xlabel('Index')
-    ax1.set_ylabel('Accuracy', color='tab:blue')
-    ax1.plot(ACC_DIFF, color='tab:blue', label='Accuracy Diff')
-    ax1.tick_params(axis='y', labelcolor='tab:blue')
-
-    # Entropy line (second y-axis)
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Entropy', color='tab:red')
-    ax2.plot(ENT_DIFF, color='tab:red', label='Entropy Diff')
-    ax2.tick_params(axis='y', labelcolor='tab:red')
-
-    # Show plot
-    fig.tight_layout()
-    plt.title("Accuracy and Entropy Over Time")
-    plt.show()
+    #plot_ent_acc_fig(ACC_DIFF, ENT_DIFF)
 
     symbol_correlation = np.sign(ENT_DIFF) == np.sign(ACC_DIFF)
     # Calculate the percentage of correlation in symbol

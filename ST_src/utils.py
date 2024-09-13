@@ -320,7 +320,26 @@ def regenerate_pseudo_label(output, labels, idx_train, unlabeled_index, threshol
 #     return idx_train_ag, pseudo_labels, idx_pseudo
 
 
+def plot_ent_acc_fig(ACC_DIFF, ENT_DIFF):
+    import matplotlib.pyplot as plt
+    # Plot
+    fig, ax1 = plt.subplots(figsize=(8, 5))
+    # Accuracy line
+    ax1.set_xlabel('Index')
+    ax1.set_ylabel('Accuracy', color='tab:blue')
+    ax1.plot(ACC_DIFF, color='tab:blue', label='Accuracy Diff')
+    ax1.tick_params(axis='y', labelcolor='tab:blue')
 
+    # Entropy line (second y-axis)
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Entropy', color='tab:red')
+    ax2.plot(ENT_DIFF, color='tab:red', label='Entropy Diff')
+    ax2.tick_params(axis='y', labelcolor='tab:red')
+
+    # Show plot
+    fig.tight_layout()
+    plt.title("Accuracy and Entropy Over Time")
+    plt.show()
 
 
 
