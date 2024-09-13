@@ -30,19 +30,17 @@ def intra_distance_loss(output, labels):
     correct_loss = torch.sum(1- pred[correct_i] + sub_pred[correct_i]) / labels.size(0)
     return incorrect_loss + correct_loss
 
-def fit_calibration(temp_model, eval, data, train_mask, test_mask, patience = 100):
+def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_mask, patience = 100):
     """
     Train calibrator
     """    
     vlss_mn = float('Inf')
     with torch.no_grad():
 
-        logits = temp_model.model(data.x, data.adj)
-        labels = data.y
+        logits = temp_model.model(features, adj)
         dev = labels.device
         logits = logits.to(dev)
 
-        edge_index = data.edge_index
         model_dict = temp_model.state_dict()
         parameters = {k: v for k,v in model_dict.items() if k.split(".")[0] != "model"}
     for epoch in range(2000):
@@ -95,7 +93,7 @@ class TS(nn.Module):
         temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))
         return temperature
 
-    def fit(self, data, train_mask, test_mask, wdecay):
+    def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
         self.to(device)
         def eval(logits):
             temperature = self.temperature_scale(logits)
@@ -104,7 +102,7 @@ class TS(nn.Module):
 
         self.train_param = [self.temperature]
         self.optimizer = optim.Adam(self.train_param, lr=0.01, weight_decay=wdecay)
-        fit_calibration(self, eval, data, train_mask, test_mask)
+        fit_calibration(self, eval, features, adj, labels, train_mask, test_mask)
         return self
 
 
@@ -150,18 +148,18 @@ class ETS(nn.Module):
         self.num_classes = num_classes
         self.temp_model = TS(model)
 
-    def forward(self, x, edge_index):
-        logits = self.model(x, edge_index)
+    def forward(self, x, adj):
+        logits = self.model(x, adj)
         temp = self.temp_model.temperature_scale(logits)
         p = self.w1 * F.softmax(logits / temp, dim=1) + self.w2 * F.softmax(logits, dim=1) + self.w3 * 1/self.num_classes
         return torch.log(p)
 
-    def fit(self, data, train_mask, test_mask, wdecay):
+    def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
         self.to(device)
-        self.temp_model.fit(data, train_mask, test_mask, wdecay)
+        self.temp_model.fit(features, adj, labels, train_mask, test_mask, wdecay)
         torch.cuda.empty_cache()
-        logits = self.model(data.x, data.adj)[train_mask]
-        label = data.y[train_mask]
+        logits = self.model(features, adj)[train_mask]
+        label = labels[train_mask]
         one_hot = torch.zeros_like(logits)
         one_hot.scatter_(1, label.unsqueeze(-1), 1)
         temp = self.temp_model.temperature.cpu().detach().numpy()

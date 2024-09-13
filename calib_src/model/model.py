@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.nn import Linear, Dropout
-from torch_geometric.nn import GCNConv, GATConv
+from dgl.nn import GraphConv, GATConv
 
 def create_model(dataset, args):
     """
@@ -32,13 +32,14 @@ class GCN(torch.nn.Module):
         layer_list = []
 
         for i in range(len(self.feature_list)-1):
-            layer_list.append(["conv"+str(i+1), GCNConv(self.feature_list[i], self.feature_list[i+1])])
+            layer_list.append(["conv"+str(i+1),
+                               GraphConv(self.feature_list[i], self.feature_list[i+1])])
         
         self.layer_list = torch.nn.ModuleDict(layer_list)
 
-    def forward(self, x, edge_index):
+    def forward(self, x, g):
         for i in range(len(self.feature_list)-1):
-            x = self.layer_list["conv"+str(i+1)](x, edge_index)
+            x = self.layer_list["conv"+str(i+1)](g, x)
             if i < len(self.feature_list)-2:
                 x = F.relu(x)
                 x = F.dropout(x, self.drop_rate, self.training)
@@ -54,15 +55,15 @@ class GAT(torch.nn.Module):
         attention_head = [1] + attention_head
         layer_list = []
         for i in range(len(self.feature_list)-1):
-            concat = False if i == num_layers-1 else True 
+            # concat = False if i == num_layers-1 else True
             layer_list.append(["conv"+str(i+1), GATConv(self.feature_list[i]* attention_head[i], self.feature_list[i+1], 
-                                                        heads=attention_head[i+1], dropout=drop_rate, concat=concat)])
+                                                        num_heads=attention_head[i+1], feat_drop=drop_rate, attn_drop=drop_rate)])
         self.layer_list = torch.nn.ModuleDict(layer_list)
 
-    def forward(self, x, edge_index):
+    def forward(self, x, g):
         for i in range(len(self.feature_list)-1):
             x = F.dropout(x, self.drop_rate, self.training)
-            x = self.layer_list["conv"+str(i+1)](x, edge_index)
+            x = self.layer_list["conv"+str(i+1)](g, x)
             if i < len(self.feature_list)-2:
                 x = F.elu(x)
         return x
