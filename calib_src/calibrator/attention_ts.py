@@ -1,13 +1,14 @@
 from typing import Union, Optional
-from torch_geometric.typing import OptPairTensor, Adj, OptTensor
-import torch
-from torch import Tensor
-import torch.nn.functional as F
-from torch.nn import Parameter
 
-from torch_geometric.nn.dense.linear import Linear
+import torch
+import torch.nn.functional as F
+from torch import Tensor
+from torch.nn import Parameter
 from torch_geometric.nn.conv import MessagePassing
+from torch_geometric.nn.dense.linear import Linear
+from torch_geometric.typing import OptPairTensor, Adj, OptTensor
 from torch_geometric.utils import remove_self_loops, add_self_loops, softmax, degree
+
 from calib_src.data.data_utils import shortest_path_length
 
 
@@ -50,7 +51,8 @@ class CalibAttentionLayer(MessagePassing):
         self.dist1_a = Parameter(torch.ones(1))
 
         # Compute the distances to the nearest training node of each node
-        dist_to_train = dist_to_train if dist_to_train is not None else shortest_path_length(edge_index, train_mask, bfs_depth)
+        dist_to_train = dist_to_train if dist_to_train is not None else shortest_path_length(edge_index, train_mask,
+                                                                                             bfs_depth)
         self.register_buffer('dist_to_train', dist_to_train)
 
         self.reset_parameters()
@@ -85,7 +87,6 @@ class CalibAttentionLayer(MessagePassing):
         a_cluster[self.dist_to_train == 0] = self.train_a
         a_cluster[self.dist_to_train == 1] = self.dist1_a
 
-
         # For confidence smoothing
         conf = F.softmax(x, dim=1).amax(-1)
         deg = degree(self.edge_index[0, :], self.num_nodes)
@@ -98,7 +99,7 @@ class CalibAttentionLayer(MessagePassing):
                              conf=conf)
         sim, dconf = out[:, :-1], out[:, -1:]
         out = F.softplus(sim + self.conf_coef * dconf * deg_inverse.unsqueeze(-1))
-        out = out.mean(dim=1) + self.bias 
+        out = out.mean(dim=1) + self.bias
         return out.unsqueeze(1)
 
     def message(

@@ -1,13 +1,11 @@
+import copy
 from typing import Sequence
 
-import networkx as nx
 import numpy as np
 import scipy
-import torch_geometric
+import torch
 from scipy.interpolate import interp1d
 from sklearn.isotonic import IsotonicRegression
-import copy
-import torch
 from torch import nn, optim
 from torch.nn import functional as F
 
@@ -16,24 +14,26 @@ from calib_src.model.model import GCN
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 def intra_distance_loss(output, labels):
     """
     Marginal regularization from CaGCN (https://github.com/BUPT-GAMMA/CaGCN)
     """
     output = F.softmax(output, dim=1)
     pred_max_index = torch.max(output, 1)[1]
-    correct_i = pred_max_index==labels
-    incorrect_i = pred_max_index!=labels
+    correct_i = pred_max_index == labels
+    incorrect_i = pred_max_index != labels
     output = torch.sort(output, dim=1, descending=True)
-    pred,sub_pred = output[0][:,0], output[0][:,1]
-    incorrect_loss = torch.sum(pred[incorrect_i]-sub_pred[incorrect_i]) / labels.size(0)
-    correct_loss = torch.sum(1- pred[correct_i] + sub_pred[correct_i]) / labels.size(0)
+    pred, sub_pred = output[0][:, 0], output[0][:, 1]
+    incorrect_loss = torch.sum(pred[incorrect_i] - sub_pred[incorrect_i]) / labels.size(0)
+    correct_loss = torch.sum(1 - pred[correct_i] + sub_pred[correct_i]) / labels.size(0)
     return incorrect_loss + correct_loss
 
-def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_mask, patience = 100):
+
+def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_mask, patience=100):
     """
     Train calibrator
-    """    
+    """
     vlss_mn = float('Inf')
     with torch.no_grad():
 
@@ -42,7 +42,7 @@ def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_ma
         logits = logits.to(dev)
 
         model_dict = temp_model.state_dict()
-        parameters = {k: v for k,v in model_dict.items() if k.split(".")[0] != "model"}
+        parameters = {k: v for k, v in model_dict.items() if k.split(".")[0] != "model"}
     for epoch in range(2000):
         temp_model.optimizer.zero_grad()
         temp_model.train()
@@ -75,6 +75,7 @@ def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_ma
     model_dict.update(state_dict_early_model)
     temp_model.load_state_dict(model_dict)
 
+
 class TS(nn.Module):
     def __init__(self, model):
         super().__init__()
@@ -95,6 +96,7 @@ class TS(nn.Module):
 
     def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
         self.to(device)
+
         def eval(logits):
             temperature = self.temperature_scale(logits)
             calibrated = logits / temperature
@@ -127,6 +129,7 @@ class VS(nn.Module):
 
     def fit(self, data, train_mask, test_mask, wdecay):
         self.to(device)
+
         def eval(logits):
             temperature = self.vector_scale(logits)
             calibrated = logits * temperature + self.bias
@@ -151,7 +154,8 @@ class ETS(nn.Module):
     def forward(self, x, adj):
         logits = self.model(x, adj)
         temp = self.temp_model.temperature_scale(logits)
-        p = self.w1 * F.softmax(logits / temp, dim=1) + self.w2 * F.softmax(logits, dim=1) + self.w3 * 1/self.num_classes
+        p = self.w1 * F.softmax(logits / temp, dim=1) + self.w2 * F.softmax(logits,
+                                                                            dim=1) + self.w3 * 1 / self.num_classes
         return torch.log(p)
 
     def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
@@ -173,29 +177,31 @@ class ETS(nn.Module):
         Code taken from (https://github.com/zhang64-llnl/Mix-n-Match-Calibration)
         Use the scipy optimization because PyTorch does not have constrained optimization.
         """
-        EPSILON =  1e-10
-        p1 = np.exp(logit)/ ( np.sum(np.exp(logit),1) + EPSILON )[:,None]
-        logit = logit/t
-        p0 = np.exp(logit)/ ( np.sum(np.exp(logit),1) + EPSILON ) [:,None]
-        p2 = np.ones_like(p0)/self.num_classes
-        
+        EPSILON = 1e-10
+        p1 = np.exp(logit) / (np.sum(np.exp(logit), 1) + EPSILON)[:, None]
+        logit = logit / t
+        p0 = np.exp(logit) / (np.sum(np.exp(logit), 1) + EPSILON)[:, None]
+        p2 = np.ones_like(p0) / self.num_classes
 
-        bnds_w = ((0.0, 1.0),(0.0, 1.0),(0.0, 1.0),)
-        def my_constraint_fun(x): return np.sum(x)-1
-        constraints = { "type":"eq", "fun":my_constraint_fun,}
-        w = scipy.optimize.minimize(ETS.ll_w, (1.0, 0.0, 0.0), args = (p0,p1,p2,label), method='SLSQP', constraints = constraints, bounds=bnds_w, tol=1e-12, options={'disp': False})
+        bnds_w = ((0.0, 1.0), (0.0, 1.0), (0.0, 1.0),)
+
+        def my_constraint_fun(x): return np.sum(x) - 1
+
+        constraints = {"type": "eq", "fun": my_constraint_fun, }
+        w = scipy.optimize.minimize(ETS.ll_w, (1.0, 0.0, 0.0), args=(p0, p1, p2, label), method='SLSQP',
+                                    constraints=constraints, bounds=bnds_w, tol=1e-12, options={'disp': False})
         w = w.x
         return w
 
     @staticmethod
     def ll_w(w, *args):
-    ## find optimal weight coefficients with Cros-Entropy loss function
+        ## find optimal weight coefficients with Cros-Entropy loss function
         p0, p1, p2, label = args
-        p = (w[0]*p0+w[1]*p1+w[2]*p2)
+        p = (w[0] * p0 + w[1] * p1 + w[2] * p2)
         N = p.shape[0]
-        EPSILON =  1e-10
-        ce = -np.sum(label*np.log(p))/(N+ EPSILON )
-        return ce   
+        EPSILON = 1e-10
+        ce = -np.sum(label * np.log(p)) / (N + EPSILON)
+        return ce
 
 
 class CaGCN(nn.Module):
@@ -205,10 +211,17 @@ class CaGCN(nn.Module):
         self.num_nodes = num_nodes
         self.cagcn = GCN(num_class, 1, 16, drop_rate=dropout_rate, num_layers=2)
 
-    def forward(self, x, edge_index):
-        logits = self.model(x, edge_index)
-        temperature = self.graph_temperature_scale(logits, edge_index)
-        return logits * F.softplus(temperature)
+    # def forward(self, x, edge_index):
+    #     logits = self.model(x, edge_index)
+    #     temperature = self.graph_temperature_scale(logits, edge_index)
+    #     return logits * F.softplus(temperature)
+
+    def forward(self, x, adj):
+        logits = self.model(x, adj)
+        temp = self.temp_model.temperature_scale(logits)
+        p = self.w1 * F.softmax(logits / temp, dim=1) + self.w2 * F.softmax(logits,
+                                                                            dim=1) + self.w3 * 1 / self.num_classes
+        return torch.log(p)
 
     def graph_temperature_scale(self, logits, edge_index):
         """
@@ -219,6 +232,7 @@ class CaGCN(nn.Module):
 
     def fit(self, data, train_mask, test_mask, wdecay):
         self.to(device)
+
         def eval(logits):
             temperature = self.graph_temperature_scale(logits, data.edge_index)
             calibrated = logits * F.softplus(temperature)
@@ -258,6 +272,7 @@ class GATS(nn.Module):
 
     def fit(self, data, train_mask, test_mask, wdecay):
         self.to(device)
+
         def eval(logits):
             temperature = self.graph_temperature_scale(logits)
             calibrated = logits / temperature
@@ -316,8 +331,8 @@ class Dirichlet(nn.Module):
         if lamb:
             k = len(b)
             assert k >= 2
-            loss += lamb / (k * (k-1)) * (
-                (w ** 2).sum() - (torch.diagonal(w) ** 2).sum())
+            loss += lamb / (k * (k - 1)) * (
+                    (w ** 2).sum() - (torch.diagonal(w) ** 2).sum())
         if mu:
             loss += mu * (b ** 2).mean()
         return loss
@@ -479,7 +494,7 @@ class Spline:
 
             # Fill in the values in the matrices
             mM[i, j] = -x ** 3 / (
-                        6.0 * delta) + x ** 2 / 2.0 - 2.0 * delta * x / 6.0
+                    6.0 * delta) + x ** 2 / 2.0 - 2.0 * delta * x / 6.0
             mM[i, j + 1] = x ** 3 / (6.0 * delta) - delta * x / 6.0
             my[i, j] = -x / delta + 1.0
             my[i, j + 1] = x / delta
@@ -637,13 +652,13 @@ class OrderInvariantCalib(nn.Module):
     def calibrate(self, logits):
         sorted_logits, sorted_indices = torch.sort(logits, descending=True)
         unsorted_indices = torch.argsort(sorted_indices, descending=False)
-        #[B, C]
+        # [B, C]
         u = self.compute_u(sorted_logits)
         inp = sorted_logits if self.invariant else logits
         m = self.base_calib(inp)
         m[:, 1:] = F.softplus(m[:, 1:].clone())
         m[:, 0] = 0
-        um = torch.cumsum(u*m, 1).flip([1])
+        um = torch.cumsum(u * m, 1).flip([1])
         out = torch.gather(um, 1, unsorted_indices)
         return out
 

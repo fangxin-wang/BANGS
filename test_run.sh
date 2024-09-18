@@ -1,37 +1,36 @@
 #!/usr/bin/env bash
 
-for data in 'Cora' 'Citeseer' # 'LastFM' 'Flicker' 'obgnarxiv' # 'Cora' 'Citeseer' 'Pubmed' #'Reddit'
+for data in 'obgnarxiv' #'obgnarxiv' # 'obgnproducts' # 'LastFM' 'Flickr' 'obgnarxiv'  # 'Cora' 'Citeseer' 'Pubmed' #'Reddit' 'ogbnmag'
 do
-  for top_node in 100
+  for top_node in 100 #100
   do
     for iter_num in 40
     do
-    for model in "GCN" #"GAT" "GIN" #"GAT" "GraphSAGE" # "GCN"
+    for model in "GCN" #"GAT" "GraphSAGE" #"GAT" "GraphSAGE" # "GCN"
     do
-    for seed in 912 #813 #814 815
+    for seed in 913 #914ß 915 #910 911 912
       do
-      for train_p in 0.05
-        do
-          for valid_p in 0.15
-          do
+      for candidate_num in 200
+      do
+      if (( top_node < candidate_num - 99)); then
           for noisy_portion in 0
-            do
-              # Random Pick
-              python3 -W ignore main_node.py --multiview --random_pick --model $model --dataset $data --seed $seed --iter $iter_num --aug_drop 0.1  --top $top_node
-              # Conf + no calib m1
-              python3 -W ignore main_node.py --multiview --conf_pick --model $model --dataset $data --seed $seed --iter $iter_num --aug_drop 0.1  --top $top_node --train_portion $train_p --valid_portion $valid_p --noisy $noisy_portion
-              # IGP + no calib m1
-              # python3 -W ignore main_node.py --multiview --IGP_pick --model $model --dataset $data --seed $seed --iter $iter_num  --top $top_node --train_portion $train_p --valid_portion $valid_p --noisy $noisy_portion
-              # IGP + calib m0
-              python3 -W ignore main_node.py --IGP_pick --model $model --dataset $data --seed $seed --iter $iter_num  --top $top_node --train_portion $train_p --valid_portion $valid_p --noisy $noisy_portion #--PageRank
-            done
+          do
+               # Random Pick
+#               python3 -W ignore main_node.py --multiview --random_pick --model $model --dataset $data --seed $seed --iter $iter_num --aug_drop 0.1  --top $top_node --FT
+#              # Conf + no calib m1
+               python3 -W ignore main_node.py --multiview --conf_pick --model $model --dataset $data --seed $seed --iter $iter_num --aug_drop 0.1  --top $top_node --noisy $noisy_portion --FT
+               # IGP + calib m0
+               python3 -W ignore main_node.py --IGP_pick --model $model --dataset $data --seed $seed --iter $iter_num  --top $top_node --noisy $noisy_portion --FT #--PageRank
           done
-        done
+      fi
       done
       done
+    done
     done
   done
 done
 
 
+#              # IGP + no calib m1
+#              python3 -W ignore main_node.py --multiview --IGP_pick --model $model --dataset $data --seed $seed --iter $iter_num  --top $top_node --train_portion $train_p --valid_portion $valid_p --noisy $noisy_portion
 

@@ -2,11 +2,11 @@
 
 for model in "GCN" #"GIN" "GraphSAGE" "GAT"
 do
-  for data in  "Flicker" # "Citeseer" "Pubmed" "LastFM" "APh" "Cora"
+  for data in  "Flickr" # "Citeseer" "Pubmed" "LastFM" "APh" "Cora"
   do
     for seed in 6666 #1111 #1234 #4321 42 4399 128
     do
-      #python3 -W ignore baseline/m3s.py --multiview --dataset $data --model $model --iter 20 --seed $seed
+      python3 -W ignore baseline/m3s.py --multiview --dataset $data --model $model --iter 20 --seed $seed
       python3 -W ignore baseline/drgst.py --dataset $data --model $model --seed $seed
     done
   done

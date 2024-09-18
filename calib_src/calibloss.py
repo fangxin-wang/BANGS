@@ -1,10 +1,11 @@
-from typing import NamedTuple
 import abc
+from typing import NamedTuple
+
 import numpy as np
 import torch
 import torch.nn.functional as nnf
-from torch import nn, Tensor, LongTensor, BoolTensor
 from KDEpy import FFTKDE
+from torch import nn, Tensor, LongTensor, BoolTensor
 
 
 # ref: https://stackoverflow.com/a/71801795
@@ -94,7 +95,7 @@ class ECE(nn.Module):
         bincumconfs, bincumcorrects, bincounts = self.binning(confs, corrects)
         # numerical trick to make 0/0=0 and other values untouched
         errs = (bincumconfs - bincumcorrects).abs() / (
-            bincounts + torch.finfo().tiny)
+                bincounts + torch.finfo().tiny)
         return ((errs ** self.norm) * bincounts / bincounts.sum()).sum()
 
 
@@ -144,6 +145,7 @@ class NodewiseECE(NodewiseMetric):
         nodecorrects = (nodepreds == nodegts)
         return self.ece_loss(nodeconfs, nodecorrects)
 
+
 class NodewiswClassECE(NodewiseMetric):
     def __init__(
             self, node_index: LongTensor, bins: int = 15,
@@ -157,11 +159,12 @@ class NodewiswClassECE(NodewiseMetric):
         num_classes = logits.size(1)
         class_ece = torch.zeros(num_classes, device=logits.device)
         for i in range(num_classes):
-            classconfs = nodeconfs[:,i]
+            classconfs = nodeconfs[:, i]
             frequency = nodegts.eq(i)
             assert classconfs.size() == frequency.size()
             class_ece[i] = self.ece_loss(classconfs, frequency)
         return torch.mean(class_ece)
+
 
 class NodewiseKDE(NodewiseMetric):
     def __init__(self, node_index: LongTensor, norm=1):
@@ -175,20 +178,22 @@ class NodewiseKDE(NodewiseMetric):
         return KDE.ece_kde(nodeconfs, nodecorrects, norm=self.norm)
 
 
-class KDE: 
+class KDE:
     """
     Code adapted from https://github.com/zhang64-llnl/Mix-n-Match-Calibration
     """
+
     @staticmethod
     def mirror_1d(d, xmin=None, xmax=None):
         """If necessary apply reflecting boundary conditions."""
         if xmin is not None and xmax is not None:
-            xmed = (xmin+xmax)/2
-            return np.concatenate(((2*xmin-d[d < xmed]).reshape(-1,1), d, (2*xmax-d[d >= xmed]).reshape(-1,1)))
+            xmed = (xmin + xmax) / 2
+            return np.concatenate(
+                ((2 * xmin - d[d < xmed]).reshape(-1, 1), d, (2 * xmax - d[d >= xmed]).reshape(-1, 1)))
         elif xmin is not None:
-            return np.concatenate((2*xmin-d, d))
+            return np.concatenate((2 * xmin - d, d))
         elif xmax is not None:
-            return np.concatenate((d, 2*xmax-d))
+            return np.concatenate((d, 2 * xmax - d))
         else:
             return d
 
@@ -197,30 +202,30 @@ class KDE:
         # Compute KDE using the bandwidth found, and twice as many grid points
         low_bound, up_bound = 0.0, 1.0
         pp = FFTKDE(bw=kbw, kernel=method).fit(conf).evaluate(x_int)
-        pp[x_int<=low_bound] = 0  # Set the KDE to zero outside of the domain
-        pp[x_int>=up_bound] = 0  # Set the KDE to zero outside of the domain
+        pp[x_int <= low_bound] = 0  # Set the KDE to zero outside of the domain
+        pp[x_int >= up_bound] = 0  # Set the KDE to zero outside of the domain
         return pp * 2  # Double the y-values to get integral of ~1       
-        
+
     @staticmethod
     @torch.no_grad()
     def ece_kde(confidence, correct, norm=1, kbw_choice='correct'):
-        confidence = torch.clip(confidence,1e-256,1-1e-256)
-        x_int = np.linspace(-0.6, 1.6, num=2**14)
-        correct_conf = (confidence[correct==1].view(-1,1)).cpu().numpy()
+        confidence = torch.clip(confidence, 1e-256, 1 - 1e-256)
+        x_int = np.linspace(-0.6, 1.6, num=2 ** 14)
+        correct_conf = (confidence[correct == 1].view(-1, 1)).cpu().numpy()
         N = confidence.size(0)
 
         if kbw_choice == 'correct':
-            kbw = np.std(correct_conf)*(N*2)**-0.2
+            kbw = np.std(correct_conf) * (N * 2) ** -0.2
         else:
-            kbw = np.std(confidence.cpu().numpy())*(N*2)**-0.2
+            kbw = np.std(confidence.cpu().numpy()) * (N * 2) ** -0.2
         # Mirror the data about the domain boundary
         low_bound = 0.0
         up_bound = 1.0
-        dconf_1m = KDE.mirror_1d(correct_conf,low_bound,up_bound)
+        dconf_1m = KDE.mirror_1d(correct_conf, low_bound, up_bound)
         pp1 = KDE.density_estimator(dconf_1m, x_int, kbw)
         pp1 = torch.from_numpy(pp1).to(confidence.device)
 
-        pred_b_intm = KDE.mirror_1d(confidence.view(-1,1).cpu().numpy(),low_bound,up_bound)
+        pred_b_intm = KDE.mirror_1d(confidence.view(-1, 1).cpu().numpy(), low_bound, up_bound)
         pp2 = KDE.density_estimator(pred_b_intm, x_int, kbw)
         pp2 = torch.from_numpy(pp2).to(confidence.device)
 
@@ -230,14 +235,15 @@ class KDE:
         integral = torch.zeros_like(x_int)
 
         conf = x_int
-        accu = perc*pp1/pp2
-        accu = torch.where((accu < 1.0), accu ,1.0)
-        thre = ( pp1 > 1e-6) | (pp2 > 1e-6 ) 
+        accu = perc * pp1 / pp2
+        accu = torch.where((accu < 1.0), accu, 1.0)
+        thre = (pp1 > 1e-6) | (pp2 > 1e-6)
         accu_notnan = ~torch.isnan(accu)
-        integral[thre & accu_notnan] = torch.abs(conf[thre & accu_notnan]-accu[thre & accu_notnan])**norm*pp2[thre & accu_notnan]
+        integral[thre & accu_notnan] = torch.abs(conf[thre & accu_notnan] - accu[thre & accu_notnan]) ** norm * pp2[
+            thre & accu_notnan]
         # Dont integrate the first sample 
         fail_thre_index = torch.nonzero(~thre)[1:]
-        integral[fail_thre_index] = integral[fail_thre_index-1]
+        integral[fail_thre_index] = integral[fail_thre_index - 1]
 
         ind = (x_int >= 0.0) & (x_int <= 1.0)
-        return torch.trapz(integral[ind],x_int[ind]) / torch.trapz(pp2[ind],x_int[ind])
+        return torch.trapz(integral[ind], x_int[ind]) / torch.trapz(pp2[ind], x_int[ind])

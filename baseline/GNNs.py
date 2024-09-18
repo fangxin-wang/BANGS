@@ -1,7 +1,7 @@
+import argparse
 import os
 import sys
-import argparse
-import numpy as np
+
 import torch
 import torch.optim as optim
 
@@ -11,7 +11,6 @@ sys.path.append(os_path)
 from utils import accuracy
 from utils import *
 from utils_plot import *
-import torch.nn as nn
 import os
 
 # Training settings
@@ -46,6 +45,7 @@ criterion = torch.nn.CrossEntropyLoss().cuda()
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(device)
 
+
 def train(model_path, idx_train, idx_val, idx_test, features, adj, labels, g):
     nclass = labels.max().item() + 1
     # Model and optimizer
@@ -62,7 +62,6 @@ def train(model_path, idx_train, idx_val, idx_test, features, adj, labels, g):
         acc_train = accuracy(output[idx_train], labels[idx_train])
         loss_train.backward()
         optimizer.step()
-
 
         with torch.no_grad():
             model.eval()
@@ -138,5 +137,3 @@ def main(dataset, model_path):
 if __name__ == '__main__':
     model_path = os_path + '/save_model/baseline/gnns-%s-%s-%d.pth' % (args.model, args.dataset, args.labelrate)
     main(args.dataset, model_path)
-
-

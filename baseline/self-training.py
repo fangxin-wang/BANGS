@@ -1,6 +1,7 @@
+import argparse
 import os
 import sys
-import argparse
+
 import numpy as np
 import torch
 import torch.optim as optim
@@ -11,7 +12,6 @@ sys.path.append(os_path)
 from utils import accuracy
 from utils import *
 from utils_plot import *
-import torch.nn as nn
 
 # Training settings
 parser = argparse.ArgumentParser()
@@ -42,6 +42,7 @@ criterion = torch.nn.CrossEntropyLoss().cuda()
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(device)
 
+
 def train(model_path, idx_train, idx_val, idx_test, features, adj, pseudo_labels, labels, seed):
     sign = True
     np.random.seed(seed)
@@ -62,7 +63,6 @@ def train(model_path, idx_train, idx_val, idx_test, features, adj, pseudo_labels
         acc_train = accuracy(output[idx_train], pseudo_labels[idx_train])
         loss_train.backward()
         optimizer.step()
-
 
         with torch.no_grad():
             model.eval()
@@ -123,7 +123,6 @@ def main(dataset, model_path):
     n_node = labels.size()[0]
     nclass = labels.max().item() + 1
 
-
     if args.labelrate != 20:
         idx_train[train_index] = True
         idx_train = generate_trainmask(idx_train, idx_val, idx_test, n_node, nclass, labels, args.labelrate)
@@ -149,9 +148,7 @@ def main(dataset, model_path):
     return
 
 
-
 if __name__ == '__main__':
-    model_path = os_path + '/save_model/baseline/st-%s-%s-%d-%f.pth' % (args.model, args.dataset, args.labelrate, args.threshold)
+    model_path = os_path + '/save_model/baseline/st-%s-%s-%d-%f.pth' % (
+    args.model, args.dataset, args.labelrate, args.threshold)
     main(args.dataset, model_path)
-
-

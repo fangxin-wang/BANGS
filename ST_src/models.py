@@ -1,13 +1,13 @@
+import dgl.function as fn
 import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.nn.parameter import Parameter
-import dgl
 from dgl.nn.pytorch.conv import SAGEConv, APPNPConv, GINConv, SGConv, GATConv
-import dgl.function as fn
 from torch.nn.modules.module import Module
+from torch.nn.parameter import Parameter
+
 
 class GraphConvolution(Module):
     """
@@ -41,8 +41,9 @@ class GraphConvolution(Module):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
+            + str(self.in_features) + ' -> ' \
+            + str(self.out_features) + ')'
+
 
 class GCN(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
@@ -50,12 +51,14 @@ class GCN(nn.Module):
         self.gc1 = GraphConvolution(nfeat, nhid)
         self.gc2 = GraphConvolution(nhid, nclass)
         self.dropout = nn.Dropout(p=dropout)
+
     def forward(self, x, adj):
         x = self.gc1(x, adj)
         x = torch.relu(x)
         x = self.dropout(x)
         x = self.gc2(x, adj)
         return x
+
 
 class GAT(nn.Module):
     def __init__(self,
@@ -84,8 +87,8 @@ class GAT(nn.Module):
             # due to multi-head, the in_dim = num_hidden * num_heads
             self.gat_layers.append(
                 GATConv(
-                num_hidden * heads[l-1], num_hidden, heads[l],
-                feat_drop, attn_drop, negative_slope, residual, self.activation))
+                    num_hidden * heads[l - 1], num_hidden, heads[l],
+                    feat_drop, attn_drop, negative_slope, residual, self.activation))
         # output projection
         self.gat_layers.append(GATConv(
             num_hidden * heads[-2], num_classes, heads[-1],
@@ -98,6 +101,7 @@ class GAT(nn.Module):
         # output projection
         logits = self.gat_layers[-1](self.g, h).mean(1)
         return logits
+
 
 class GraphSAGE(nn.Module):
     def __init__(self,
@@ -115,7 +119,8 @@ class GraphSAGE(nn.Module):
         # input layer
         self.layers.append(SAGEConv(in_feats, n_hidden, aggregator_type, feat_drop=dropout, activation=activation))
         # output layer
-        self.layers.append(SAGEConv(n_hidden, n_classes, aggregator_type, feat_drop=dropout, activation=None)) # activation None
+        self.layers.append(
+            SAGEConv(n_hidden, n_classes, aggregator_type, feat_drop=dropout, activation=None))  # activation None
 
     def forward(self, features, adj):
         h = features
@@ -158,6 +163,7 @@ class APPNP(nn.Module):
         h = self.propagate(self.g, h)
         return h
 
+
 class GIN(nn.Module):
     def __init__(self,
                  g,
@@ -173,7 +179,7 @@ class GIN(nn.Module):
         self.mlp1 = nn.Linear(in_feats, hidden)
         self.mlp2 = nn.Linear(hidden, n_classes)
 
-        self.layer1 = GINConv(self.mlp1, 'max', eps) ##max?
+        self.layer1 = GINConv(self.mlp1, 'max', eps)  ##max?
         self.layer2 = GINConv(self.mlp2, 'max', eps)
 
         self.activation = activation
@@ -182,7 +188,6 @@ class GIN(nn.Module):
             self.feat_drop = nn.Dropout(feat_drop)
         else:
             self.feat_drop = lambda x: x
-
 
     def forward(self, features, adj):
         # prediction step
@@ -196,6 +201,7 @@ class GIN(nn.Module):
         h = self.layer2(self.g, h)
         return h
 
+
 class SGC(nn.Module):
     def __init__(self,
                  g,
@@ -206,10 +212,9 @@ class SGC(nn.Module):
         self.g = g
 
         self.model = SGConv(in_feats,
-                   n_classes,
-                   k=num_k,
-                   cached=True)
-
+                            n_classes,
+                            k=num_k,
+                            cached=True)
 
     def forward(self, features, adj):
         # prediction step
@@ -303,6 +308,7 @@ class MixHopConv(nn.Module):
 
         return final
 
+
 class MixHop(nn.Module):
     def __init__(self,
                  g,
@@ -316,7 +322,7 @@ class MixHop(nn.Module):
                  activation=None,
                  batchnorm=False):
         super(MixHop, self).__init__()
-        self.g=g
+        self.g = g
         self.in_dim = in_dim
         self.hid_dim = hid_dim
         self.out_dim = out_dim
@@ -366,6 +372,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(256, 64)
         self.fc3 = nn.Linear(64, nclass)
         self.dropout = nn.Dropout(p=dropout)
+
     def forward(self, x):
         output = self.fc1(x)
         output = F.relu(output)
@@ -396,6 +403,7 @@ class _ECELoss(nn.Module):
     "Obtaining Well Calibrated Probabilities Using Bayesian Binning." AAAI.
     2015.
     """
+
     def __init__(self, n_bins=20):
         """
         n_bins (int): number of confidence interval bins
@@ -417,9 +425,10 @@ class _ECELoss(nn.Module):
             if prop_in_bin.item() > 0:
                 accuracy_in_bin = accuracies[in_bin].float().mean()
                 avg_confidence_in_bin = confidences[in_bin].mean()
-                ece +=  torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
+                ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
 
         return ece
+
 
 class ModelWithTemperature(nn.Module):
     """
@@ -429,6 +438,7 @@ class ModelWithTemperature(nn.Module):
         NB: Output of the neural network should be the classification logits,
             NOT the softmax (or log_before_12 softmax)!
     """
+
     def __init__(self, model, n_bins):
         super(ModelWithTemperature, self).__init__()
         self.model = model
@@ -477,6 +487,7 @@ class ModelWithTemperature(nn.Module):
             loss = nll_criterion(self.temperature_scale(logits), labels)
             loss.backward()
             return loss
+
         optimizer.step(eval)
 
         # Calculate NLL and ECE after temperature scaling
@@ -486,4 +497,3 @@ class ModelWithTemperature(nn.Module):
         print('After temperature - NLL: %.3f, ECE: %.3f' % (after_temperature_nll, after_temperature_ece))
 
         return self
-

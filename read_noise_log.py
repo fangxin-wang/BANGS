@@ -19,7 +19,7 @@ early_stopped_acc_pattern = r"Best Acc Early Stopped by Valid Acc: ([0-9.]+)"
 
 # Find all matches
 noisy_portion = re.findall(noisy_portion_pattern, log)
-#test_accuracies = re.findall(test_results_pattern, log)
+# test_accuracies = re.findall(test_results_pattern, log)
 best_test_accuracy = re.findall(best_test_accuracy_pattern, log)
 final_test_accuracy = re.findall(final_test_accuracy_pattern, log)
 early_stopped_acc = re.findall(early_stopped_acc_pattern, log)
@@ -27,8 +27,9 @@ early_stopped_acc = re.findall(early_stopped_acc_pattern, log)
 # Store results in a dictionary
 results = {}
 
-for i in range(len(noisy_portion) ):
-    results[noisy_portion[i]] = [float(best_test_accuracy[i]), float(final_test_accuracy[i]), float(early_stopped_acc[i])]
+for i in range(len(noisy_portion)):
+    results[noisy_portion[i]] = [float(best_test_accuracy[i]), float(final_test_accuracy[i]),
+                                 float(early_stopped_acc[i])]
     print(noisy_portion[i], best_test_accuracy[i], early_stopped_acc[i])
 # Print results
 print(results)

@@ -1,11 +1,8 @@
 from typing import Union, List, Tuple
+
+import numpy as np
 from torch import Tensor
 from torch_geometric.data import Dataset
-
-import torch
-import numpy as np
-
-from torch_geometric.io.planetoid import index_to_mask
 
 
 def get_idx_split(
@@ -48,7 +45,7 @@ def get_idx_split(
 
     # k-fold indices for training and validation set
     fold_indices = sample_per_class(labels, num_nodes, classes,
-                                    samples_per_class_in_one_fold*k_fold, forbidden_indices=None)
+                                    samples_per_class_in_one_fold * k_fold, forbidden_indices=None)
     for k in range(k_fold):
         k_fold_indices.append(fold_indices[k::k_fold])
         # print((labels[fold_indices[k::k_fold]] == 2).sum())
@@ -60,7 +57,7 @@ def get_idx_split(
                                         test_samples_per_class,
                                         forbidden_indices=forbidden_indices)
     else:
-    # All the remaining indices belong to test indices
+        # All the remaining indices belong to test indices
         test_indices = np.setdiff1d(remaining_indices, forbidden_indices)
 
     # assert that there are no duplicates in sets
@@ -69,13 +66,13 @@ def get_idx_split(
     assert len(set(test_indices)) == len(test_indices)
     # assert sets are mutually exclusive
     for i in range(k_fold):
-        for j in range(i+1, k_fold):
+        for j in range(i + 1, k_fold):
             assert len(set(k_fold_indices[i]) - set(k_fold_indices[j])) == len(set(k_fold_indices[i]))
             assert len(set(k_fold_indices[i]) - set(test_indices)) == len(set(k_fold_indices[i]))
 
     return k_fold_indices, test_indices
 
- 
+
 def sample_per_class(labels: Tensor, num_nodes: int, classes: List[int],
                      samples_per_class: Union[int, float],
                      forbidden_indices: np.array = None) -> np.array:
@@ -111,4 +108,4 @@ def sample_per_class(labels: Tensor, num_nodes: int, classes: List[int],
     return np.concatenate(
         [np.random.choice(sample_indices_per_class[class_index], num_samples_per_class[class_index], replace=False)
          for class_index in classes
-        ])
+         ])

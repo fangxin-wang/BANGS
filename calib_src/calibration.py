@@ -1,23 +1,25 @@
 import abc
-import torch
-from torch import Tensor, LongTensor
-import torch.nn.functional as F
-import os
 import gc
+import os
+import warnings
 from pathlib import Path
-from calib_src.data.data_utils import load_data, load_node_to_nearest_training
-from calib_src.model.model import create_model
-from calib_src.calibrator.calibrator import \
-    TS, VS, ETS, CaGCN, GATS, IRM, SplineCalib, Dirichlet, OrderInvariantCalib
+
+import torch
+import torch.nn.functional as F
+from torch import Tensor, LongTensor
+
 from calib_src.calibloss import \
     NodewiseECE, NodewiseBrier, NodewiseNLL, Reliability, NodewiseKDE, \
     NodewiswClassECE
+from calib_src.calibrator.calibrator import \
+    TS, VS, ETS, CaGCN, GATS, IRM, SplineCalib, Dirichlet, OrderInvariantCalib
+from calib_src.data.data_utils import load_data, load_node_to_nearest_training
+from calib_src.model.model import create_model
 from calib_src.utils import \
     set_global_seeds, arg_parse, name_model, create_nested_defaultdict, \
     metric_mean, metric_std, default_cal_wdecay, save_prediction
-import warnings
-warnings.filterwarnings("ignore")
 
+warnings.filterwarnings("ignore")
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
@@ -52,6 +54,7 @@ class Metrics(metaclass=abc.ABCMeta):
     def cls_ece(self) -> float:
         raise NotImplementedError
 
+
 class NodewiseMetrics(Metrics):
     def __init__(
             self, logits: Tensor, gts: LongTensor, index: LongTensor,
@@ -82,7 +85,7 @@ class NodewiseMetrics(Metrics):
 
     def reliability(self) -> Reliability:
         return self.ece_fn.get_reliability(self.logits, self.gts)
-    
+
     def kde(self) -> float:
         return self.kde_fn(self.logits, self.gts).item()
 
@@ -102,12 +105,12 @@ def eval(data, log_prob, mask_name):
     eval_result = {}
     eval = NodewiseMetrics(log_prob, data.y, mask)
     acc, nll, brier, ece, kde, cls_ece = eval.acc(), eval.nll(), \
-                                eval.brier(), eval.ece(), eval.kde(), eval.cls_ece()
-    eval_result.update({'acc':acc,
-                        'nll':nll,
-                        'bs':brier,
-                        'ece':ece,
-                        'kde':kde,
+        eval.brier(), eval.ece(), eval.kde(), eval.cls_ece()
+    eval_result.update({'acc': acc,
+                        'nll': nll,
+                        'bs': brier,
+                        'ece': ece,
+                        'kde': kde,
                         'cls_ece': cls_ece})
     reliability = eval.reliability()
     del eval
@@ -120,7 +123,7 @@ def main(split, init, eval_type_list, args):
     uncal_test_result = create_nested_defaultdict(eval_type_list)
     cal_val_result = create_nested_defaultdict(eval_type_list)
     cal_test_result = create_nested_defaultdict(eval_type_list)
-    max_fold = int(args.split_type.split("_")[1].replace("f",""))
+    max_fold = int(args.split_type.split("_")[1].replace("f", ""))
 
     for fold in range(max_fold):
         # Load data
@@ -142,7 +145,8 @@ def main(split, init, eval_type_list, args):
 
         ### Store uncalibrated result
         if args.save_prediction:
-            save_prediction(log_prob.cpu().numpy(), args.dataset, args.split_type, split, init, fold, args.model, "uncal")
+            save_prediction(log_prob.cpu().numpy(), args.dataset, args.split_type, split, init, fold, args.model,
+                            "uncal")
 
         for eval_type in eval_type_list:
             eval_result, reliability = eval(data, log_prob, 'Test')
@@ -170,7 +174,7 @@ def main(split, init, eval_type_list, args):
         elif args.calibration == 'GATS':
             dist_to_train = load_node_to_nearest_training(args.dataset, args.split_type, split, fold)
             temp_model = GATS(model, data.edge_index, data.num_nodes, data.train_mask,
-                            dataset.num_classes, dist_to_train, args.gats_args)
+                              dataset.num_classes, dist_to_train, args.gats_args)
 
         ### Train the calibrator on validation set and validate it on the training set
         cal_wdecay = args.cal_wdecay if args.cal_wdecay is not None else default_cal_wdecay(args)
@@ -182,8 +186,8 @@ def main(split, init, eval_type_list, args):
 
         # Store calibrated result
         if args.save_prediction:
-            save_prediction(log_prob.cpu().numpy(), args.dataset, args.split_type, split, init, fold, args.model, args.calibration)
-
+            save_prediction(log_prob.cpu().numpy(), args.dataset, args.split_type, split, init, fold, args.model,
+                            args.calibration)
 
         ### The training set is the validation set for the calibrator
         for eval_type in eval_type_list:
@@ -204,7 +208,7 @@ if __name__ == '__main__':
     print(args)
     set_global_seeds(args.seed)
     eval_type_list = ['Nodewise']
-    max_splits,  max_init = 5, 5
+    max_splits, max_init = 5, 5
 
     uncal_test_total = create_nested_defaultdict(eval_type_list)
     cal_val_total = create_nested_defaultdict(eval_type_list)
@@ -232,8 +236,8 @@ if __name__ == '__main__':
             test_mean = metric_mean(result[eval_type])
             test_std = metric_std(result[eval_type])
             print(f"{eval_type:>8} Accuracy: &{test_mean['acc']:.2f}$\pm${test_std['acc']:.2f} \t" + \
-                                f"NLL: &{test_mean['nll']:.4f}$\pm${test_std['nll']:.4f} \t" + \
-                                f"Brier: &{test_mean['bs']:.4f}$\pm${test_std['bs']:.4f} \t" + \
-                                f"ECE: &{test_mean['ece']:.2f}$\pm${test_std['ece']:.2f} \t" + \
-                                f"Classwise-ECE: &{test_mean['cls_ece']:.2f}$\pm${test_std['cls_ece']:.2f} \t" + \
-                                f"KDE: &{test_mean['kde']:.2f}$\pm${test_std['kde']:.2f}")
+                  f"NLL: &{test_mean['nll']:.4f}$\pm${test_std['nll']:.4f} \t" + \
+                  f"Brier: &{test_mean['bs']:.4f}$\pm${test_std['bs']:.4f} \t" + \
+                  f"ECE: &{test_mean['ece']:.2f}$\pm${test_std['ece']:.2f} \t" + \
+                  f"Classwise-ECE: &{test_mean['cls_ece']:.2f}$\pm${test_std['cls_ece']:.2f} \t" + \
+                  f"KDE: &{test_mean['kde']:.2f}$\pm${test_std['kde']:.2f}")

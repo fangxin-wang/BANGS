@@ -1,20 +1,21 @@
-import os
-import math
-import random
 import abc
-import gc
 import copy
-import numpy as np
-from pathlib import Path
+import os
 from collections import defaultdict
-import torch 
+from pathlib import Path
+
+import numpy as np
+import torch
 import torch.nn.functional as F
 from torch import Tensor, LongTensor
-from calib_src.model.model import create_model
-from calib_src.utils import set_global_seeds, arg_parse, name_model, metric_mean, metric_std
+
 from calib_src.calibloss import NodewiseECE, NodewiseBrier, NodewiseNLL
 from calib_src.data.data_utils import load_data
+from calib_src.model.model import create_model
+from calib_src.utils import set_global_seeds, arg_parse, name_model, metric_mean, metric_std
+
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+
 
 class Metrics(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -60,17 +61,18 @@ class NodewiseMetrics(Metrics):
     def ece(self) -> float:
         return self.ece_fn(self.logits, self.gts).item()
 
+
 def main(split, init, args):
     # Evaluation
     val_result = defaultdict(list)
     test_result = defaultdict(list)
-    max_fold = int(args.split_type.split("_")[1].replace("f",""))
+    max_fold = int(args.split_type.split("_")[1].replace("f", ""))
 
     for fold in range(max_fold):
         epochs = 2000
-        lr = 0.01 #0.05
+        lr = 0.01  # 0.05
         model_name = name_model(fold, args)
-        
+
         # Early stopping
         patience = 100
         vlss_mn = float('Inf')
@@ -85,7 +87,7 @@ def main(split, init, args):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = create_model(dataset, args).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.wdecay)
-        
+
         # print(model)
         data = data.to(device)
         criterion = torch.nn.CrossEntropyLoss()
@@ -93,7 +95,7 @@ def main(split, init, args):
             model.train()
             optimizer.zero_grad()
             logits = model(data.x, data.edge_index)
-            loss = criterion(logits[data.train_mask], data.y[data.train_mask]) 
+            loss = criterion(logits[data.train_mask], data.y[data.train_mask])
             loss.backward()
             optimizer.step()
 
@@ -110,20 +112,24 @@ def main(split, init, args):
                 for mask in [data.train_mask, data.val_mask]:
                     eval = NodewiseMetrics(log_prob, data.y, mask)
                     acc, nll, brier, ece = eval.acc(), eval.nll(), eval.brier(), eval.ece()
-                    accs.append(acc); nlls.append(nll); briers.append(brier); eces.append(ece)                    
+                    accs.append(acc);
+                    nlls.append(nll);
+                    briers.append(brier);
+                    eces.append(ece)
 
-                ### Early stopping
-                val_acc = acc; val_loss = nll
+                    ### Early stopping
+                val_acc = acc;
+                val_loss = nll
                 if val_acc >= vacc_mx or val_loss <= vlss_mn:
                     if val_acc >= vacc_mx and val_loss <= vlss_mn:
                         state_dict_early_model = copy.deepcopy(model.state_dict())
                         b_epoch = i
-                        best_result.update({'log_prob':log_prob,
-                                            'acc':accs[1],
-                                            'nll':nlls[1],
-                                            'bs':briers[1],
-                                            'ece':eces[1]})
-                    vacc_mx = np.max((val_acc, vacc_mx)) 
+                        best_result.update({'log_prob': log_prob,
+                                            'acc': accs[1],
+                                            'nll': nlls[1],
+                                            'bs': briers[1],
+                                            'ece': eces[1]})
+                    vacc_mx = np.max((val_acc, vacc_mx))
                     vlss_mn = np.min((val_loss, vlss_mn))
                     curr_step = 0
                 else:
@@ -131,18 +137,21 @@ def main(split, init, args):
                     if curr_step >= patience:
                         break
                 if args.verbose:
-                    print(f'Epoch: : {i+1:03d}, Accuracy: {accs[0]:.4f}, NNL: {nlls[0]:.4f}, Brier: {briers[0]:.4f}, ECE:{eces[0]:.4f}')
-                    print(' ' * 14 + f'Accuracy: {accs[1]:.4f}, NNL: {nlls[1]:.4f}, Brier: {briers[1]:.4f}, ECE:{eces[1]:.4f}')
-        
+                    print(
+                        f'Epoch: : {i + 1:03d}, Accuracy: {accs[0]:.4f}, NNL: {nlls[0]:.4f}, Brier: {briers[0]:.4f}, ECE:{eces[0]:.4f}')
+                    print(
+                        ' ' * 14 + f'Accuracy: {accs[1]:.4f}, NNL: {nlls[1]:.4f}, Brier: {briers[1]:.4f}, ECE:{eces[1]:.4f}')
+
         eval = NodewiseMetrics(best_result['log_prob'], data.y, data.test_mask)
         acc, nll, brier, ece = eval.acc(), eval.nll(), eval.brier(), eval.ece()
-        test_result['acc'].append(acc); test_result['nll'].append(nll); test_result['bs'].append(brier)
+        test_result['acc'].append(acc);
+        test_result['nll'].append(nll);
+        test_result['bs'].append(brier)
         test_result['ece'].append(ece)
 
         del best_result['log_prob']
         for metric in best_result:
             val_result[metric].append(best_result[metric])
-
 
         # print("best epoch is:", b_epoch)
         dir = Path(os.path.join('model', args.dataset, args.split_type, 'split' + str(split),
@@ -156,11 +165,10 @@ def main(split, init, args):
 if __name__ == '__main__':
     args = arg_parse()
     set_global_seeds(args.seed)
-    max_splits,  max_init = 5, 5
+    max_splits, max_init = 5, 5
 
-
-    val_total_result = {'acc':[], 'nll':[]}
-    test_total_result = {'acc':[], 'nll':[]}
+    val_total_result = {'acc': [], 'nll': []}
+    test_total_result = {'acc': [], 'nll': []}
     for split in range(max_splits):
         for init in range(max_init):
             val_result, test_result = main(split, init, args)
@@ -171,8 +179,7 @@ if __name__ == '__main__':
     val_mean = metric_mean(val_total_result)
     test_mean = metric_mean(test_total_result)
     test_std = metric_std(test_total_result)
-    print(f"Val  Accuracy: &{val_mean['acc']:.2f} \t" + " " * 8 +\
-            f"NLL: &{val_mean['nll']:.4f}")
+    print(f"Val  Accuracy: &{val_mean['acc']:.2f} \t" + " " * 8 + \
+          f"NLL: &{val_mean['nll']:.4f}")
     print(f"Test Accuracy: &{test_mean['acc']:.2f}\pm{test_std['acc']:.2f} \t" + \
-            f"NLL: &{test_mean['nll']:.4f}\pm{test_std['nll']:.4f}")
-
+          f"NLL: &{test_mean['nll']:.4f}\pm{test_std['nll']:.4f}")

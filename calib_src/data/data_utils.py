@@ -1,23 +1,25 @@
 import os
-import re
+from pathlib import Path
+
 import numpy as np
 import torch
-from pathlib import Path
-from tqdm import tqdm
 from torch import Tensor
 from torch_geometric.data import Dataset
 from torch_geometric.datasets import Planetoid, Amazon, Coauthor, CoraFull
 from torch_geometric.io.planetoid import index_to_mask
 from torch_geometric.transforms import NormalizeFeatures
+from tqdm import tqdm
+
 from calib_src.data.split import get_idx_split
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 # Run at console -> python -c 'from calib_src.data.data_utils import *; split_data("Cora", 5, 3, 85)'
 def split_data(
-        name: str, 
-        samples_in_one_fold: int, 
-        k_fold: int, 
+        name: str,
+        samples_in_one_fold: int,
+        k_fold: int,
         test_samples_per_class: int):
     """
     name: str, the name of the dataset
@@ -26,8 +28,8 @@ def split_data(
     test_samples_per_class: int, sample x% of each class for test set
     """
     print(name)
-    assert name in ['Cora','Citeseer', 'Pubmed', 'Computers', 'Photo', 'CS', 'Physics', 'CoraFull']
-    if name in ['Cora','Citeseer', 'Pubmed']:
+    assert name in ['Cora', 'Citeseer', 'Pubmed', 'Computers', 'Photo', 'CS', 'Physics', 'CoraFull']
+    if name in ['Cora', 'Citeseer', 'Pubmed']:
         dataset = Planetoid(root='./data/', name=name, split='random')
     elif name in ['Computers', 'Photo']:
         dataset = Amazon(root='./data/', name=name)
@@ -36,20 +38,21 @@ def split_data(
     elif name == 'CoraFull':
         dataset = CoraFull(root='./data/')
 
-    split_type = str(samples_in_one_fold)+"_"+str(k_fold)+'f_'+str(test_samples_per_class)       
-    raw_dir = Path(os.path.join('data','split', str(name), split_type))
+    split_type = str(samples_in_one_fold) + "_" + str(k_fold) + 'f_' + str(test_samples_per_class)
+    raw_dir = Path(os.path.join('data', 'split', str(name), split_type))
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     # For each configuration we split the data five times
     for i in range(5):
-        assert int(samples_in_one_fold)*int(k_fold)+int(test_samples_per_class) <= 100, "Invalid fraction" 
+        assert int(samples_in_one_fold) * int(k_fold) + int(test_samples_per_class) <= 100, "Invalid fraction"
         k_fold_indices, test_indices = get_idx_split(dataset,
-                    samples_per_class_in_one_fold=samples_in_one_fold/100.,
-                    k_fold=k_fold,
-                    test_samples_per_class=test_samples_per_class/100.)
+                                                     samples_per_class_in_one_fold=samples_in_one_fold / 100.,
+                                                     k_fold=k_fold,
+                                                     test_samples_per_class=test_samples_per_class / 100.)
         split_file = f'{name.lower()}_split_{i}.npz'
         print(f"sample/fold/test: {len(k_fold_indices[0])}/{len(k_fold_indices)}/{len(test_indices)}")
-        np.savez(raw_dir/split_file, k_fold_indices=k_fold_indices, test_indices=test_indices)
+        np.savez(raw_dir / split_file, k_fold_indices=k_fold_indices, test_indices=test_indices)
+
 
 def load_data(name: str, split_type: str, split: int, fold: int) -> Dataset:
     """
@@ -59,7 +62,7 @@ def load_data(name: str, split_type: str, split: int, fold: int) -> Dataset:
     fold: int, index of the fold to be used as validation set. The rest k-1 folds will be used as training set.
     """
     transform = NormalizeFeatures()
-    if name in ['Cora','Citeseer', 'Pubmed']:
+    if name in ['Cora', 'Citeseer', 'Pubmed']:
         dataset = Planetoid(root='./data/', name=name, transform=transform)
         load_split_from_numpy_files(dataset, name, split_type, split, fold)
     elif name in ['Computers', 'Photo']:
@@ -73,28 +76,30 @@ def load_data(name: str, split_type: str, split: int, fold: int) -> Dataset:
         load_split_from_numpy_files(dataset, name, split_type, split, fold)
     return dataset
 
+
 def load_split_from_numpy_files(dataset, name, split_type, split, fold):
     """
     load train/val/test from saved k-fold split files
     """
-    raw_dir = Path(os.path.join('data','split', str(name), split_type))
+    raw_dir = Path(os.path.join('data', 'split', str(name), split_type))
     assert raw_dir.is_dir(), "Split type does not exist."
     split_file = f'{name.lower()}_split_{split}.npz'
     masks = np.load(raw_dir / split_file, allow_pickle=True)
-    val_indices = torch.tensor( masks['k_fold_indices'][fold] )
-    train_indices = torch.tensor( np.concatenate(np.delete(masks['k_fold_indices'], fold, axis=0)) )
-    test_indices = torch.tensor( masks['test_indices'] )
+    val_indices = torch.tensor(masks['k_fold_indices'][fold])
+    train_indices = torch.tensor(np.concatenate(np.delete(masks['k_fold_indices'], fold, axis=0)))
+    test_indices = torch.tensor(masks['test_indices'])
 
     dataset.data.train_mask = index_to_mask(train_indices, dataset.data.num_nodes)
     dataset.data.val_mask = index_to_mask(val_indices, dataset.data.num_nodes)
     dataset.data.test_mask = index_to_mask(test_indices, dataset.data.num_nodes)
 
+
 # Run at console -> python -c 'from calib_src.data.data_utils import *; generate_node_to_nearest_training("Cora", "5_3f_85")'
-def generate_node_to_nearest_training(name: str, split_type: str, bfs_depth = 10):
+def generate_node_to_nearest_training(name: str, split_type: str, bfs_depth=10):
     max_split = int(split_type.split("_")[0])
-    max_fold = int(split_type.split("_")[1].replace("f",""))
+    max_fold = int(split_type.split("_")[1].replace("f", ""))
     for split in tqdm(range(max_split)):
-        raw_dir = Path(os.path.join('data','dist_to_train', str(name), split_type))
+        raw_dir = Path(os.path.join('data', 'dist_to_train', str(name), split_type))
         for fold in tqdm(range(max_fold)):
             dataset = load_data(name=name, split_type=split_type, split=split, fold=fold)
             data = dataset.data
@@ -103,7 +108,8 @@ def generate_node_to_nearest_training(name: str, split_type: str, bfs_depth = 10
             raw_split_dir = raw_dir / f'split_{split}'
             raw_split_dir.mkdir(parents=True, exist_ok=True)
             split_file = f'{name.lower()}_dist_to_train_f{fold}.npy'
-            np.save(raw_split_dir/split_file, dist_to_train)
+            np.save(raw_split_dir / split_file, dist_to_train)
+
 
 def load_node_to_nearest_training(name: str, split_type: str, split: int, fold: int):
     split_file = os.path.join(
@@ -112,6 +118,7 @@ def load_node_to_nearest_training(name: str, split_type: str, split: int, fold: 
     if not os.path.isfile(split_file):
         generate_node_to_nearest_training(name, split_type)
     return torch.from_numpy(np.load(split_file))
+
 
 def shortest_path_length(edge_index, mask, max_hop):
     """
@@ -124,14 +131,15 @@ def shortest_path_length(edge_index, mask, max_hop):
         dist_to_train[mask] = hop
         next_hop = torch.zeros_like(mask, dtype=torch.bool, device=mask.device)
         for node in current_hop:
-            node_mask = edge_index[0,:]==node
-            nbrs = edge_index[1,node_mask]
+            node_mask = edge_index[0, :] == node
+            nbrs = edge_index[1, node_mask]
             next_hop[nbrs] = True
         hop += 1
         # mask for the next hop shouldn't be seen before
         mask = torch.logical_and(next_hop, ~seen_mask)
         seen_mask[next_hop] = True
-    return dist_to_train        
+    return dist_to_train
+
 
 def get_train_hop_hist(
         edge_index: np.ndarray, train_index: np.ndarray, nodes: int,
@@ -156,6 +164,7 @@ def get_train_hop_hist(
             current_nodes = next_nodes
         train_hop_count[np.arange(nodes), hops] += 1
     return train_hop_count
+
 
 def load_train_hop_hist(
         name: str, split_type: str, split: int, fold: int, max_hop: int

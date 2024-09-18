@@ -1,12 +1,8 @@
-import dgl
 from copy import deepcopy
-
-import scipy.sparse as sp
-import torch.optim as optim
 
 from ST_src.data import *
 from ST_src.models import *
-from ST_src.utils_new import *
+
 
 def get_models(args, nfeat, nclass, g, FT=False):
     model_name = args.model
@@ -45,7 +41,7 @@ def get_models(args, nfeat, nclass, g, FT=False):
                           n_classes=nclass,
                           activation=F.relu,
                           dropout=droprate,
-                          aggregator_type='gcn') # 'gcn'
+                          aggregator_type='gcn')  # 'gcn'
     elif model_name == 'APPNP':
         model = APPNP(g=g,
                       in_feats=nfeat,
@@ -94,7 +90,6 @@ def weighted_cross_entropy(output, labels, bald, beta, nclass, sign=True):
     if sign:
         output = torch.softmax(output, dim=1)
 
-
     # output[output==0] += 1e-6
     # output[output==1] -= 1e-6
     bald = bald / (torch.mean(bald) * beta)
@@ -113,7 +108,7 @@ def get_norm_logit(output, with_softmax=False):
     else:
         EPS = 0.0001
         logits_no_inf = output[torch.isfinite(output)]
-        max_finite_value, min_finite_value =  torch.max(logits_no_inf), torch.min(logits_no_inf)
+        max_finite_value, min_finite_value = torch.max(logits_no_inf), torch.min(logits_no_inf)
         output[output == float('inf')] = max_finite_value
         output[output == -float('inf')] = min_finite_value
         output = torch.abs(output)
@@ -121,16 +116,18 @@ def get_norm_logit(output, with_softmax=False):
 
         max_value = torch.max(output)
         min_value = torch.min(output) + EPS
-        output = (output - min_value) / (max_value-min_value)
+        output = (output - min_value) / (max_value - min_value)
 
     print(torch.max(output), torch.min(output))
     return output
+
 
 def get_confidence(output, with_softmax=True):
     if with_softmax:
         output = torch.softmax(output, dim=1)
     confidence, pred_label = torch.max(output, dim=1)
     return confidence, pred_label
+
 
 @torch.no_grad()
 def multiview_pred(model, features, adj, g, args):
@@ -139,7 +136,7 @@ def multiview_pred(model, features, adj, g, args):
     _, pred = get_confidence(best_output)
     print("get_confidence")
     consist = torch.ones(pred.shape).bool().to(device)
-    
+
     if not args.multiview:
         for _ in range(3):
             output_d = model(features, adj)
@@ -170,7 +167,6 @@ def multiview_pred(model, features, adj, g, args):
         adj_aug = dgl_only_get_adj(g_aug).to(device)
         ############
 
-
         if args.model != 'GCN':
             model.g = aug_g
             output_aug = model(features, adj)
@@ -184,7 +180,7 @@ def multiview_pred(model, features, adj, g, args):
         aug_g = deepcopy(g).to(args.device)
         noise = torch.rand(g.ndata['feat'].shape).to(device) * torch.std(g.ndata['feat']) * args.aug_drop / 2
         features_aug = features + noise
-        aug_g.ndata['feat'] += noise 
+        aug_g.ndata['feat'] += noise
         if args.model != 'GCN':
             model.g = aug_g
         output_aug = model(features_aug, adj)
@@ -215,6 +211,7 @@ def get_mc_adj(oadj, device, droprate=0.1):
         mc_adj.append(adj_tmp)
     return mc_adj
 
+
 def update_T(output, idx_train, labels, T, device):
     output = torch.softmax(output, dim=1)
     T.requires_grad = True
@@ -229,6 +226,7 @@ def update_T(output, idx_train, labels, T, device):
         optimizer.step()
     T.requires_grad = False
     return T
+
 
 def uncertainty_dropedge(mc_adj, adj, features, g, nclass, model_path, args, device):
     state_dict = torch.load(model_path)
@@ -251,6 +249,7 @@ def uncertainty_dropedge(mc_adj, adj, features, g, nclass, model_path, args, dev
         Eentropy = torch.sum(out_mean * torch.log(out_mean), dim=1)
         bald = entropy - Eentropy
     return bald
+
 
 def uncertainty_dropout(adj, features, g, nclass, model_path, args, device):
     f_pass = 100
@@ -275,6 +274,7 @@ def uncertainty_dropout(adj, features, g, nclass, model_path, args, device):
         bald = entropy - Eentropy
     return bald
 
+
 def regenerate_pseudo_label(output, labels, idx_train, unlabeled_index, threshold, device, sign=False):
     're-generate pseudo labels every stage'
     unlabeled_index = torch.where(unlabeled_index == True)[0]
@@ -294,6 +294,8 @@ def regenerate_pseudo_label(output, labels, idx_train, unlabeled_index, threshol
     if pseudo_index.size()[0] != 0:
         idx_pseudo[pseudo_index] = 1
     return idx_train_ag, pseudo_labels, idx_pseudo
+
+
 #
 # def generate_IGP_pseudo_label(adj, output, labels, idx_train, idx_unlabeled, device = 'cpu'):
 #
@@ -342,4 +344,12 @@ def plot_ent_acc_fig(ACC_DIFF, ENT_DIFF):
     plt.show()
 
 
+def min_max_normalize(tensor):
+    # Compute the min and max values for each column
+    min_vals = tensor.min(dim=0, keepdim=True)[0]
+    max_vals = tensor.max(dim=0, keepdim=True)[0]
 
+    # Apply the min-max normalization
+    normalized_tensor = (tensor - min_vals) / (max_vals - min_vals)
+
+    return normalized_tensor

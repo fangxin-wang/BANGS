@@ -1,11 +1,6 @@
-import numpy as np
-from random import randint
 import torch
 import torch.nn.functional as F
-from ST_src.utils import *
-from ST_src.utils_new import *
-
-
+import numpy as np
 def compute_ece(predictions, labels, n_bins=20):
     # Ensure predictions are probabilities
     if predictions.ndim == 1:
@@ -26,6 +21,7 @@ def compute_ece(predictions, labels, n_bins=20):
             ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
 
     return ece.item()
+
 
 def uniform_sample(indices, K, N):
     if K > len(indices):
@@ -68,6 +64,7 @@ def convert_to_one_hot(labels, num_class):
 
     return one_hot_labels
 
+
 # def Entropy_utility(y_probs, idx_sampled, idx_train_ag, influence_matrix):
 #
 #     influenced_columns = torch.where(torch.any(influence_matrix[idx_sampled] > 0, axis=0))[0]
@@ -84,13 +81,13 @@ def convert_to_one_hot(labels, num_class):
 #     return total_Ent
 
 def probs_convert_to_one_hot_tensor(prob_tensor):
-
     _, max_indices = torch.max(prob_tensor, dim=1)
 
     # Convert these indices to a one-hot encoded tensor
     one_hot_tensor = F.one_hot(max_indices, num_classes=prob_tensor.shape[1])
 
     return one_hot_tensor.float()
+
 
 # def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled, influence_matrix):
 #     """
@@ -149,9 +146,10 @@ def get_sparse_column(sparse_tensor, col_idx):
 
     return sparse_col_tensor
 
+
 def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled, influence_matrix):
     device = influence_matrix.device
-    #print(f"Device of influence_matrix: {device}")
+    # print(f"Device of influence_matrix: {device}")
     """
     y_probs: idx_train -> one hot
     """
@@ -167,11 +165,11 @@ def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled
     # Iterate over idx_pseudo_ag to update the influenced_mask
     for idx in idx_pseudo_ag:
         column_tensor = get_sparse_column(influence_matrix, idx)
-        #print(column_tensor.device, influenced_mask.device)
+        # print(column_tensor.device, influenced_mask.device)
         influenced_mask |= (column_tensor.to_dense().squeeze() > 0)
 
-    influenced_nodes = torch.where(influenced_mask & idx_unlabeled) [0]
-    #print("influenced_nodes")
+    influenced_nodes = torch.where(influenced_mask & idx_unlabeled)[0]
+    # print("influenced_nodes")
 
     # ####################
     # # Randomly select positions to set to False
@@ -186,16 +184,15 @@ def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled
 
     influence_matrix_influenced = influence_matrix.index_select(0, influenced_nodes)
     influence_submatrix = influence_matrix_influenced.index_select(1, idx_pseudo_ag)
-    #print(influence_matrix_influenced.size(), influence_submatrix.size())
+    # print(influence_matrix_influenced.size(), influence_submatrix.size())
 
     total_prob_origin = F.normalize(
-        torch.sparse.mm(influence_submatrix, y_probs[idx_pseudo_ag]), dim= 1)
+        torch.sparse.mm(influence_submatrix, y_probs[idx_pseudo_ag]), dim=1)
 
     entropies = -torch.sum(total_prob_origin * torch.log(total_prob_origin + 1e-9), dim=1)
-    #print(total_prob_origin.size(), entropies.size())
+    # print(total_prob_origin.size(), entropies.size())
     total_Ent = entropies.sum()
-    #print('total_Ent', total_Ent.item() )
-
+    # print('total_Ent', total_Ent.item() )
 
     # total_Ent = 0
     # for node_j in influenced_nodes:
@@ -205,7 +202,6 @@ def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled
     #     total_Ent += entropy_origin
     #
     # print('total_Ent', total_Ent)
-
 
     influence_matrix_train = influence_matrix.index_select(0, idx_train)
     influence_submatrix_train = influence_matrix_train.index_select(1, idx_pseudo_ag)
@@ -217,12 +213,13 @@ def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled
     criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
     Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
 
-    #print('Cross_Ent', Cross_Ent.item() )
+    # print('Cross_Ent', Cross_Ent.item() )
 
     return - total_Ent - Cross_Ent
 
+
 def Entropy_utility_efficient(y_probs, idx_sampled, idx_train, idx_train_ag, idx_poss_ag,
-                                           influence_submatrix, total_prob_origin, influence_submatrix_train):
+                              influence_submatrix, total_prob_origin, influence_submatrix_train):
     device = influence_submatrix.device
     # total_prob_origin
     # probs influenced by training nodes
@@ -232,38 +229,49 @@ def Entropy_utility_efficient(y_probs, idx_sampled, idx_train, idx_train_ag, idx
 
     ### STEP 1
     # sample_prob
-    sample_mask = torch.zeros( y_probs.shape[0] , dtype=torch.bool)
+    sample_mask = torch.zeros(y_probs.shape[0], dtype=torch.bool)
     sample_mask[idx_sampled] = True
     y_probs_copy = y_probs.clone()
     y_probs_copy[~sample_mask] = 0
 
     # influence_submatrix: influenced_nodes * idx_poss_ag
-    sample_prob =  torch.sparse.mm(influence_submatrix, y_probs_copy[idx_poss_ag])
+    sample_prob = torch.sparse.mm(influence_submatrix, y_probs_copy[idx_poss_ag])
 
-    final_prob = F.normalize(total_prob_origin + sample_prob,  dim= 1)
+    final_prob = F.normalize(total_prob_origin + sample_prob, dim=1)
     ######## 8.20
-    final_prob = torch.softmax(final_prob, dim = 1)
+    final_prob = torch.softmax(final_prob, dim=1)
     ########
-    entropies = -torch.sum(final_prob * torch.log(final_prob + 1e-9), dim=1)
-    total_Ent = entropies.sum()
-    # print('total_Ent', total_Ent.item() )
+    class_prob = torch.mean(final_prob, dim = 0)
+    class_Ent = -torch.sum(  class_prob * torch.log(class_prob + 1e-9)  )
 
-    # ### STEP 2
-    #
-    # # influence_submatrix_train = idx_train_value * idx_poss_ag
-    #
-    # #idx_pseudo_ag = torch.cat((idx_train_ag, idx_sampled), dim=0)
-    # Prob_train_prop = F.normalize(
-    #     torch.sparse.mm(influence_submatrix_train, y_probs_copy[idx_poss_ag]), dim=1)
-    #
-    # criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
-    # Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
-    #
-    # # print('Cross_Ent', Cross_Ent.item() )
+    individual_entropies = -torch.sum(final_prob * torch.log(final_prob + 1e-9), dim=1)
+    individual_Ent  = torch.mean(individual_entropies)
 
-    return - total_Ent #- Cross_Ent
+    # individual_Ent = individual_entropies.sum()
+    #print('individual_Ent', individual_Ent.item() )
 
-def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation,
+    ### STEP 2
+
+    # influence_submatrix_train = idx_train_value * idx_poss_ag
+
+    # idx_pseudo_ag = torch.cat((idx_train_ag, idx_sampled), dim=0)
+    Prob_train_prop = F.normalize(
+        torch.sparse.mm(influence_submatrix_train, y_probs_copy[idx_poss_ag]), dim=1)
+
+    criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
+    Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
+
+    #print('class_Ent', class_Ent.item() , 'individual_Ent', individual_Ent.item(), 'Cross_Ent', Cross_Ent.item())
+    return class_Ent - individual_Ent - Cross_Ent
+
+
+    #return class_Ent - total_Ent - Cross_Ent
+
+    # return - total_Ent
+
+
+def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args,
+                       avg_ece_validation,
                        N=100, FIX_NUM_SAMPLE=False):
     """
     Maximal Sample Reuse:
@@ -274,15 +282,14 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
     # Step 0: Prepare probs of all nodes
     y_probs = output.clone()
 
-
-    #print('y_probs', torch.max(y_probs), torch.min(y_probs))
-    #y_probs = torch.softmax(y_probs, dim=1)
+    # print('y_probs', torch.max(y_probs), torch.min(y_probs))
+    # y_probs = torch.softmax(y_probs, dim=1)
     # confidence, pred_label = torch.max(y_probs, dim=1)
 
     num_class = y_probs.shape[1]
     # 9.12 test
     # y_probs[idx_train] = convert_to_one_hot(labels[idx_train], num_class).float()
-    #print( 'y_probs', torch.max(y_probs), torch.min(y_probs))
+    # print( 'y_probs', torch.max(y_probs), torch.min(y_probs))
 
     K = args.top
 
@@ -314,7 +321,7 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
 
     # Each node is expected to be sampled t times
     N = int(SAMPLES_RANGE * t / K)
-    print("Compute top ", K, "nodes from ",SAMPLES_RANGE, " nodes for Banzhaf, and sampling", N, " times...")
+    print("Compute top ", K, "nodes from ", SAMPLES_RANGE, " nodes for Banzhaf, and sampling", N, " times...")
 
     # if FIX_NUM_SAMPLE:
     #     sampled_matrix = uniform_sample_N(idx_to_label, K, N)
@@ -332,11 +339,9 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
     # idx_train_ag = idx_train_ag & mask
     # print("After: ", torch.sum(idx_train_ag).item() )
 
-
     sampled_matrix = uniform_sample(idx_to_label, K, N)
     # sampled_matrix = confidence_importance_sample(confidence, K, N)
     Utilities = torch.zeros(N).to(args.device)
-
 
     EFFICIENT = True
     # 08/01: For efficiency, calculate the probs of ALL POSSIBLY INFLUENCED nodes influenced by ONLY original training nodes
@@ -348,7 +353,7 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
             idx_poss = idx_to_label
 
         idx_train_ag = torch.where(idx_train_ag == True)[0]
-        idx_poss_ag = torch.cat((  idx_train_ag , idx_poss), dim=0)
+        idx_poss_ag = torch.cat((idx_train_ag, idx_poss), dim=0)
         influenced_mask = torch.zeros(influence_matrix.size(0), dtype=torch.bool).to(args.device)
         for idx in idx_poss_ag:
             column_tensor = get_sparse_column(influence_matrix, idx)
@@ -364,7 +369,7 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
         influence_submatrix = influence_matrix_influenced.index_select(1, idx_poss_ag)
         # print(influence_matrix_influenced.size(), influence_submatrix.size())
 
-        idx_train_value =  torch.where(idx_train == True)[0]
+        idx_train_value = torch.where(idx_train == True)[0]
         influence_matrix_train = influence_matrix.index_select(0, idx_train_value)
         influence_submatrix_train = influence_matrix_train.index_select(1, idx_poss_ag)
 
@@ -372,12 +377,13 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
         for n in range(N):
             idx_sampled = sampled_matrix[n]
             Utilities[n] = Entropy_utility_efficient(y_probs, idx_sampled, idx_train, idx_train_ag, idx_poss_ag,
-                                           influence_submatrix, total_prob_origin, influence_submatrix_train)
+                                                     influence_submatrix, total_prob_origin, influence_submatrix_train)
     else:
 
         for n in range(N):
             idx_sampled = sampled_matrix[n]
-            Utilities[n] = Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled, influence_matrix)
+            Utilities[n] = Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled,
+                                           influence_matrix)
 
     # plot_tensor_distribution(Utilities)
 
@@ -388,7 +394,7 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
         #     print("Not confident")
         #     continue
 
-        contain_mask = torch.tensor( [ (sampled_matrix[n] == node_i).any() for n in range(N) ] )
+        contain_mask = torch.tensor([(sampled_matrix[n] == node_i).any() for n in range(N)])
         U_mean_with = torch.mean(Utilities[contain_mask])
         U_mean_without = torch.mean(Utilities[~contain_mask])
         Values[node_i] = U_mean_with - U_mean_without
@@ -398,29 +404,28 @@ def IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabel
     return Values
 
 
-def get_IGP_idx_game(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation):
+def get_IGP_idx_game(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args,
+                     avg_ece_validation):
     """
     Select Nodes with Game-theoretical value calculation.
     - Utility function: IGP
     - Value calculation: 1) Banzhaf; 2) Shapely
-    - Sampling: 1) Confidence Top K; 2) Random; 3) Importance Sampling
+    - Sampling: 1) Confidence Top K; 2) Random
     """
 
     # TODO: Shapely
     # confidence, pred_label = get_confidence(output)
-    Values = IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence,
+    Values = IGP_sample_banzhaf(adj, output, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix,
+                                confidence,
                                 args, avg_ece_validation)
 
     # 1. TOP k
     Ent, pl_idx = torch.topk(Values, args.top)
 
-    # 2. Positive
-    #pl_idx = torch.where(Values > 0) [0]
-
     # print( torch.where(Values > 0) [0].shape )
     pl_confidence = confidence[pl_idx]
     if torch.min(pl_confidence) <= 0.0001:
-        pl_idx = torch.where( confidence>0) [0]
+        pl_idx = torch.where(confidence > 0)[0]
         if pl_idx.shape[0] == 0:
             print("All labeled")
             return torch.tensor([])
@@ -437,4 +442,3 @@ def top_k_indices(input_dict, k):
     top_k_indices = [item[0] for item in sorted_items[:k]]
 
     return top_k_indices
-

@@ -1,10 +1,12 @@
+from collections import Counter
+
+import math
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn.functional as F
-import matplotlib.pyplot as plt
-import dgl
-from collections import Counter
-import math
+import networkx as nx
+
+
 
 # def normalize_adjacency_matrix(adj_matrix):
 #     """
@@ -55,20 +57,20 @@ def get_influence_matrix(adj_matrix, k):
     """
     Compute the influence score matrix for k steps using a sparse adjacency matrix.
     """
-    #transition_matrix = normalize_adjacency_matrix(adj_matrix).to_sparse()
+    # transition_matrix = normalize_adjacency_matrix(adj_matrix).to_sparse()
     transition_matrix = adj_matrix
     influence_matrix = transition_matrix.clone()
 
-    #print('Norm')
+    # print('Norm')
     influence_matrix_list = [transition_matrix]
 
     for _ in range(1, k):
-
         influence_matrix = torch.sparse.mm(influence_matrix, transition_matrix)
-        influence_matrix_list.append( influence_matrix )
+        influence_matrix_list.append(influence_matrix)
         print('k')
 
     return influence_matrix_list
+
 
 def get_ppr_influence_matrix(adj, alpha=0.85, tol=1e-4, max_iter=100):
     device = adj.device
@@ -91,15 +93,15 @@ def get_ppr_influence_matrix(adj, alpha=0.85, tol=1e-4, max_iter=100):
         if ERR < tol:
             pagerank = pagerank_new
             break
-        print( i, '-th round, ERR:', ERR )
+        print(i, '-th round, ERR:', ERR)
         pagerank = pagerank_new
-    print(pagerank.size() )
+    print(pagerank.size())
     return pagerank.to_sparse()
 
 
 def get_k_hop_neighbors(adj_matrix, node_indices, k):
     device = adj_matrix.device
-    #print(device)
+    # print(device)
     N = adj_matrix.size(0)
     neighbors = node_indices.clone()
 
@@ -116,7 +118,7 @@ def get_k_hop_neighbors(adj_matrix, node_indices, k):
         current_level_one_hot = torch.zeros(N)
         current_level_one_hot[current_level_nodes] = 1
         current_level_one_hot = current_level_one_hot.unsqueeze(1).to(device)
-        #print(adj_matrix.device, current_level_one_hot.device)
+        # print(adj_matrix.device, current_level_one_hot.device)
 
         # Multiply adjacency matrix with one-hot vector to get neighbors
         next_level_one_hot = torch.sparse.mm(adj_matrix, current_level_one_hot).squeeze(1)
@@ -137,6 +139,7 @@ def get_k_hop_neighbors(adj_matrix, node_indices, k):
         current_level_nodes = next_level_nodes
 
     return neighbors
+
 
 def add_sparse_matrices(mat1, mat2):
     """
@@ -167,6 +170,8 @@ def calculate_entropy(distribution):
     # Filter out zero probabilities to avoid log_before_12(0)
     distribution = distribution[distribution > 0]
     return -torch.sum(distribution * torch.log2(distribution))
+
+
 #
 # def get_IGP(node_j, node_i, labeled_node_idx, influence_matrix, y_probs, NORM = True):
 #     """
@@ -246,8 +251,6 @@ def find_intersection(tensor2_sorted, tensor1_sorted):
     matched = tensor2_sorted[idx[mask]] == tensor1_sorted[mask]
     return tensor1_sorted[mask][matched]
 
-import networkx as nx
-
 def print_node_attributes(G, labels, pl_idx, idx_train, idx_train_ag, confidence, logger):
     confidence[idx_train_ag] = 1
     nx_G = G.to('cpu').to_networkx().to_undirected()
@@ -280,9 +283,9 @@ def print_node_attributes(G, labels, pl_idx, idx_train, idx_train_ag, confidence
 
         total_neighbor_set = total_neighbor_set.union(neighbors_2_hop_set)
 
-        confidences_1_hop, confidences_2_hop = confidence [neighbors_1_hop], confidence [neighbors_2_hop]
-        #print(confidences_1_hop)
-        #print(confidences_2_hop)
+        confidences_1_hop, confidences_2_hop = confidence[neighbors_1_hop], confidence[neighbors_2_hop]
+        # print(confidences_1_hop)
+        # print(confidences_2_hop)
         mean_confidence_1_hop = torch.nanmean(confidences_1_hop)
         mean_confidence_2_hop = torch.nanmean(confidences_2_hop)
         # print(f"  Mean Confidence 1-hop: {mean_confidence_1_hop}")
@@ -294,23 +297,25 @@ def print_node_attributes(G, labels, pl_idx, idx_train, idx_train_ag, confidence
         label_frequency_2_hop = Counter(labels[neighbors_2_hop].tolist())
         total_labels = len(labels[neighbors_2_hop])
         # Calculate the entropy
-        entropy = -sum((count / total_labels) * math.log2(count / total_labels) for count in label_frequency_2_hop.values())
+        entropy = -sum(
+            (count / total_labels) * math.log2(count / total_labels) for count in label_frequency_2_hop.values())
 
         # print(f" Neighborhood Label 1-hop: {label_frequency_1_hop}")
         # print(f" Neighborhood Label 2-hop: {label_frequency_2_hop}, Entropy: {entropy}")
         l_entropy.append(entropy)
 
-    logger.info(f"l_degree: {np.nanmean(l_degree) }, l_centrality: {np.nanmean(l_centrality)}, "
-          f"l_confidence_2_hop: {np.nanmean(l_confidence_2_hop)}, l_entropy: {np.nanmean(l_entropy)}, "
-          f"total neighbor num: {len(total_neighbor_set)}")
+    logger.info(f"l_degree: {np.nanmean(l_degree)}, l_centrality: {np.nanmean(l_centrality)}, "
+                f"l_confidence_2_hop: {np.nanmean(l_confidence_2_hop)}, l_entropy: {np.nanmean(l_entropy)}, "
+                f"total neighbor num: {len(total_neighbor_set)}")
 
-def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay = 0.9):
+
+def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay=0.9):
     # output = torch.softmax(output, dim=1)
 
-    max_prob, argmax_pos = torch.max(output, dim = 1)
+    max_prob, argmax_pos = torch.max(output, dim=1)
 
-    global_thres_updated = decay * global_thres + (1-decay) * torch.mean(max_prob[~idx_train])
-    local_thres_updated = decay * local_thres + (1-decay) * torch.mean(output[~idx_train], dim = 0)
+    global_thres_updated = decay * global_thres + (1 - decay) * torch.mean(max_prob[~idx_train])
+    local_thres_updated = decay * local_thres + (1 - decay) * torch.mean(output[~idx_train], dim=0)
 
     max_local_thres = torch.max(local_thres_updated)
     local_thres_final = local_thres_updated / max_local_thres * global_thres_updated
@@ -318,4 +323,3 @@ def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay =
     mask = max_prob > local_thres_final[argmax_pos]
 
     return mask, global_thres_updated, local_thres_updated
-

@@ -10,6 +10,7 @@ __pycache__/
 
 # Data
 data/
+dataset/
 
 # checkpoint
 es_checkpoint.pt

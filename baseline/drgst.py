@@ -1,10 +1,11 @@
 import argparse
+import os
+import random
+import sys
+
 import numpy as np
 import torch
 import torch.optim as optim
-import random
-import os
-import sys
 
 os_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os_path)
@@ -14,11 +15,10 @@ from data import *
 import torch.nn as nn
 import logging
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='GCN')
 parser.add_argument('--dataset', type=str, default="Cora", help='dataset for training')
-parser.add_argument('--hidden', type=int, default=128,help='Number of hidden units.')
+parser.add_argument('--hidden', type=int, default=128, help='Number of hidden units.')
 parser.add_argument("--hid_dim_1", type=int, default=32, help="Hidden layer dimension")
 parser.add_argument("--view", type=int, default=5, help="Number of extra view of augmentation")
 
@@ -30,9 +30,9 @@ parser.add_argument('--nb_out_heads', type=int, default=8)
 parser.add_argument('--weight_decay', type=float, default=5e-4, help='Weight decay (L2 loss on parameters).')
 parser.add_argument("--dropout", type=float, default=0.3, help="Dropout rate in training")
 parser.add_argument("--aug_drop", type=float, default=0.1, help="Attribute augmentation dropout rate")
-parser.add_argument('--lr', type=float, default=0.001,help='Initial learning rate.')
+parser.add_argument('--lr', type=float, default=0.001, help='Initial learning rate.')
 parser.add_argument('--alpha', type=float, default=0.2, help='Alpha for the leaky_relu.')
-parser.add_argument('--beta', type=float, default=1/3,help='coefficient for weighted CE loss')
+parser.add_argument('--beta', type=float, default=1 / 3, help='coefficient for weighted CE loss')
 
 parser.add_argument("--threshold", type=float, default=0.53, help="Threshold for pseudo labeling")
 parser.add_argument("--iter", type=int, default=3, help="Number of pseudo labeling iteration")
@@ -72,7 +72,7 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
     # Model and optimizer
     model = get_models(args, features.shape[1], nclass, g=g)
     optimizer = optim.Adam(model.parameters(),
-                       lr=args.lr, weight_decay=args.weight_decay)
+                           lr=args.lr, weight_decay=args.weight_decay)
     model.to(device)
     best, bad_counter = 0, 0
     for epoch in range(args.epochs):
@@ -82,7 +82,8 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
         output = torch.softmax(output, dim=1)
         output = torch.mm(output, T)
         sign = False
-        loss_train = weighted_cross_entropy(output[idx_train], pseudo_labels[idx_train], bald[idx_train], args.beta, nclass, sign)
+        loss_train = weighted_cross_entropy(output[idx_train], pseudo_labels[idx_train], bald[idx_train], args.beta,
+                                            nclass, sign)
         # loss_train = criterion(output[idx_train], pseudo_labels[idx_train])
         acc_train = accuracy(output[idx_train], pseudo_labels[idx_train])
         loss_train.backward()
@@ -114,7 +115,7 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
         if bad_counter == args.patience:
             # print('early stop')
             break
-        
+
         # if epoch % 100 == 0:
         # print(f'epoch: {epoch}',
         #     f'loss_train: {loss_train.item():.4f}',
@@ -123,7 +124,7 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
         #     f'acc_val: {acc_val:.4f}',
         #     f'loss_test: {loss_test.item():4f}',
         #     f'acc_test: {acc_test:.4f}')
-        
+
     # print("best result: ", best_print)
     return best_output
 
@@ -139,14 +140,16 @@ def test(adj, features, labels, idx_test, nclass, model_path, g, logger):
     output = model(features, adj)
     loss_test = criterion(output[idx_test], labels[idx_test])
     acc_test = accuracy(output[idx_test], labels[idx_test])
-    logger.info("Test set results: loss= {:.4f}, accuracy= {:.4f}".format(loss_test.item(),acc_test))
+    logger.info("Test set results: loss= {:.4f}, accuracy= {:.4f}".format(loss_test.item(), acc_test))
 
     return acc_test, loss_test
 
 
 if __name__ == '__main__':
-    model_path = './save_model/drgst-%s-%s-itr%s-seed%s-thr%.2f.pth' % (args.model, args.dataset, args.iter, args.seed, args.threshold)
-    log_path = './log/drgst-%s-%s-itr%s-seed%s-thr%.2f.txt' % (args.model, args.dataset, args.iter, args.seed, args.threshold)
+    model_path = './save_model/drgst-%s-%s-itr%s-seed%s-thr%.2f.pth' % (
+    args.model, args.dataset, args.iter, args.seed, args.threshold)
+    log_path = './log/drgst-%s-%s-itr%s-seed%s-thr%.2f.txt' % (
+    args.model, args.dataset, args.iter, args.seed, args.threshold)
     log_time_format = '%Y-%m-%d %H:%M:%S'
     log_format = '%(levelname)s %(asctime)s - %(message)s'
     log_time_format = '%Y-%m-%d %H:%M:%S'
@@ -181,12 +184,12 @@ if __name__ == '__main__':
     idx_train_ag = idx_train.clone().to(device)
     pseudo_labels = labels.clone().to(device)
     bald = torch.ones(n_node).to(device)
-    T = nn.Parameter(torch.eye(nclass, nclass).to(device)) # transition matrix
+    T = nn.Parameter(torch.eye(nclass, nclass).to(device))  # transition matrix
     T.requires_grad = False
 
-    best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g)
+    best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels, bald,
+                        T, g)
     acc_test0, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
-
 
     # generate pseudo labels
     # state_dict = torch.load(model_path)
@@ -209,24 +212,26 @@ if __name__ == '__main__':
             bald = uncertainty_dropedge(mc_adj, adj, features, g, nclass, model_path, args, device)
 
         # model.eval()
-        idx_train_ag, pseudo_labels, idx_pseudo = regenerate_pseudo_label(best_output, pseudo_labels, idx_train, idx_unlabeled,
-                                                                        args.threshold, device)
-        pred_diff =  pseudo_labels[idx_pseudo] == labels[idx_pseudo]
+        idx_train_ag, pseudo_labels, idx_pseudo = regenerate_pseudo_label(best_output, pseudo_labels, idx_train,
+                                                                          idx_unlabeled,
+                                                                          args.threshold, device)
+        pred_diff = pseudo_labels[idx_pseudo] == labels[idx_pseudo]
         n_pl = len(pred_diff)
         if n_pl > 0:
-            best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g)
-            pred_diff = len(pred_diff[pred_diff==True])/len(pred_diff)
-            logger.info('itr {} summary: added {} pl labels , pl_acc: {}'.format(itr, n_pl,  pred_diff*100))
+            best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels,
+                                bald, T, g)
+            pred_diff = len(pred_diff[pred_diff == True]) / len(pred_diff)
+            logger.info('itr {} summary: added {} pl labels , pl_acc: {}'.format(itr, n_pl, pred_diff * 100))
 
             acc_test, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
             N_pl_list.append(n_pl)
             pl_acc.append(pred_diff)
             tests.append(acc_test)
-    
+
     pl_acc = np.array(pl_acc)
     N_pl_list = np.array(N_pl_list)
-    ave_pl_acc = np.sum(pl_acc*N_pl_list)/np.sum(N_pl_list)
+    ave_pl_acc = np.sum(pl_acc * N_pl_list) / np.sum(N_pl_list)
     logger.info('original acc: {:.5f}, best test accuracy: {:.5f}, pl_acc: {:.5f}'.format(
-        acc_test0, max(tests), pl_acc[np.argmax(tests)])) #ave_pl_acc
-    
+        acc_test0, max(tests), pl_acc[np.argmax(tests)]))  # ave_pl_acc
+
     # print("ENDS")
