@@ -44,12 +44,30 @@ def read_logs_from_directory(directory):
     return dict(sorted(data.items()))  # Sort the dictionary by filename
 
 
-log_data = read_logs_from_directory('log')
+log_data = read_logs_from_directory('final_log')
 
 
 # print(log_data)
 def extract_info_from_filename(filename):
     """Extract components from the filename using regex."""
+    pattern = re.compile(
+        r"cautious-(\w+)-(\w+)-itr(\d+)-top(\d+)-seed(\d+)-m(\d+)-(\w+)-ft(\w+)-ppr(\w+)\.txt"
+    )
+    match = pattern.search(filename)
+    if match:
+        return {
+            'Model': match.group(1),
+            'Dataset': match.group(2),
+            'Iteration': int(match.group(3)),
+            'Node Num Each Iteration': int(match.group(4)),
+            'Seed': int(match.group(5)),
+            'Multiview': int(match.group(6)),
+            'Selection Criterion': match.group(7),
+            'Fine Tuning': match.group(8),
+            'PPR': match.group(9),
+        }
+    #print('No match in file name')
+
     pattern = re.compile(
         r"cautious-(\w+)-(\w+)-itr(\d+)-top(\d+)-seed(\d+)-m(\d+)-(\w+)-ft(\w+)\.txt"
     )
@@ -64,8 +82,8 @@ def extract_info_from_filename(filename):
             'Multiview': int(match.group(6)),
             'Selection Criterion': match.group(7),
             'Fine Tuning': match.group(8),
+            'PPR': 'UNK',
         }
-    #print('No match in file name')
     return {}
 
 
@@ -83,28 +101,36 @@ for filename, metrics in log_data.items():
 df = pd.DataFrame(rows)
 
 # Reorder and rename columns according to the requirement
-df = df[['Model', 'Dataset', 'Iteration', 'Node Num Each Iteration', 'Seed', 'Multiview', 'Selection Criterion', 'Fine Tuning',
-         'origin_accuracy',
-         'best_test_accuracy', 'final_test_accuracy', 'best_acc_early_stopped']]
-df.columns = ['Model', 'Dataset', 'Iteration', 'Node Num', 'Seed', 'Multiview', 'Selection Criterion', 'FT',
-              'Origin',
-              'Best Test', 'Final', 'Early Stopped']
+df = df[['Model', 'Dataset', 'Iteration', 'Node Num Each Iteration', 'Seed', 'Multiview', 'Selection Criterion', 'Fine Tuning', 'PPR',
+         'origin_accuracy', 'best_test_accuracy', 'final_test_accuracy', 'best_acc_early_stopped']]
+df.columns = ['Model', 'Dataset', 'Iteration', 'Node Num', 'Seed', 'Multiview', 'Selection Criterion', 'FT', 'PPR',
+              'Origin','Best Test', 'Final', 'Early Stopped']
 
 # print(df)
 # df_select = df [ ~( (df ['Multiview'] == 0) & (df ['Selection Criterion'] == 'Conf')) & (df['Model'] == 'GCN') ]
 # df_select = df[ (df['Node Num'] == 100) & (df['Dataset']=='Cora') & (df['Model']== 'GCN') &(df.Seed.isin([ 1204,1234,1111,8888,6666]) ) ]
-df_select = df[(df.Dataset.isin (['Flickr','obgnarxiv']) ) &(df.Seed.isin([910, 911, 912, 913, 914, 915])) & (df['Iteration'] == 40)]
-#df_select = df[ (df.Seed.isin([910, 911, 912])) & (df ['Selection Criterion']!= 'random') ]
+#df_select = df[(df.Seed.isin([916,917,918])) & (df['Iteration'] == 40)]
+df_select = df[   df.Seed.isin([910, 911, 912, 913 , 914, 915, 916, 917, 918, 919]) & (df.Dataset.isin (['Cora']) )]
+                  # & (df.Dataset.isin (['APh']) ) #& (df['FT'] == 'False')
+                  #   ]#& (df['FT'] == 'True') & (df['PPR'] == 'True') & & (df['Node Num']==100)
+                #& ((df ['Selection Criterion'] == 'IGP') )] #|  (df ['Selection Criterion'] == 'IGP'
 # df_select = df[  (df.Seed.isin([ 1204,1234,1111,8888,6666]) ) & (df['Iteration']==40) & (df['Model'] != 'GCN')]
-
 # print(df_select)
 
 
 df_select[['Origin', 'Best Test', 'Early Stopped']] = df_select[['Origin', 'Best Test', 'Early Stopped']] * 100
-
 df_select['improve'] = df_select['Best Test'] - df_select['Origin']
 print(df_select)
 
-res = df_select.groupby(['Dataset', 'Model', 'Node Num', 'Multiview', 'Selection Criterion','FT'])[
-    ['Origin', 'Best Test', 'Early Stopped']].agg(['mean', 'std', 'count'])
+pd.set_option('display.max_rows', None)
+res = df_select.groupby(['Dataset', 'Model', 'Node Num', 'Iteration', 'Multiview', 'Selection Criterion','FT','PPR'])[
+    ['Origin', 'Best Test', 'Early Stopped', 'improve']].agg(['mean', 'std', 'count'])
+
 print(res)
+
+# df_select_baseline[['Origin', 'Best Test', 'Early Stopped']] = df_select_baseline[['Origin', 'Best Test', 'Early Stopped']] * 100
+# df_select_baseline['improve'] = df_select_baseline['Best Test'] - df_select_baseline['Origin']
+#
+# res = df_select_baseline.groupby(['Dataset', 'Model', 'Node Num', 'Multiview', 'Selection Criterion','FT'])[
+#     ['Origin', 'Best Test', 'Early Stopped']].agg(['mean', 'std', 'count'])
+# print(res)

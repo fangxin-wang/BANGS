@@ -61,50 +61,6 @@ def get_edge_index(data):
     return torch.sparse.FloatTensor(indices, values, shape)
 
 
-def objn_to_pyg(dataset):
-    from torch_geometric.data import Data
-    from scipy.sparse import coo_matrix
-
-    # Extract the graph and labels
-    dgl_graph, labels = dataset[0]
-
-    # Move the graph and labels to the desired device (e.g., CPU or GPU)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    dgl_graph = dgl_graph.to(device)
-    labels = labels.squeeze(1).to(device)
-
-    # Extract node features
-    node_features = dgl_graph.ndata['feat'].to(device) if 'feat' in dgl_graph.ndata else None
-
-    # Extract edge indices
-    edge_index = torch.stack(dgl_graph.edges()).to(device)
-
-    # Extract edge attributes (if any)
-    edge_attr = dgl_graph.edata['feat'].to(device) if 'feat' in dgl_graph.edata else None
-
-    # Move edge indices to CPU for adjacency matrix creation
-    edge_index_cpu = edge_index.cpu()
-
-    # Create adjacency matrix
-    num_nodes = dgl_graph.num_nodes()
-    adj_matrix = coo_matrix((torch.ones(edge_index_cpu.shape[1]), (edge_index_cpu[0], edge_index_cpu[1])),
-                            shape=(num_nodes, num_nodes))
-    adj = torch.sparse_coo_tensor(torch.tensor([adj_matrix.row, adj_matrix.col]), torch.tensor(adj_matrix.data),
-                                  torch.Size(adj_matrix.shape)).to(device)
-
-    # Create the PyG Data object
-    pyg_data = Data(
-        x=node_features,
-        y=labels,
-        edge_index=edge_index,
-        edge_attr=edge_attr,
-        adj=adj
-    )
-
-    # Print the PyG Data object
-    return pyg_data
-
-
 def dgl_to_pyg(dgl_dataset, device):
     # Check if the dataset contains any graphs and extract the first graph
     if hasattr(dgl_dataset, 'graphs') and len(dgl_dataset.graphs) > 0:
@@ -198,16 +154,13 @@ def load_data(dataset, device, seed, noisy_portion=0, train_portion=0.05, valid_
         raise ValueError('wrong dataset name.')
 
     if dataset in ['obgnarxiv', 'obgnproducts']:
-
         g = dgl_graph
-        g = dgl.add_self_loop(g)
-        features = g.ndata['feat']
-
     else:
         g = data[0]
-        g = dgl.add_self_loop(g)
-        features = g.ndata['feat']
-        labels = g.ndata['label']
+
+    g = dgl.add_self_loop(g)
+    features = g.ndata['feat']
+    labels = g.ndata['label']
 
         # pyg_graph = dgl_to_pyg(data, device)
 
@@ -273,7 +226,6 @@ def add_identity(adj):
 
     return adj_with_identity
 
-
 def dgl_only_get_adj(g):
     # transform = GCNNorm()
     # g = transform(g)
@@ -318,9 +270,12 @@ def graph2adj(g):
 
 def split_dataset_class(g, labels, n, m, seed ):
     np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+
     num_nodes = g.number_of_nodes()
     # Extract the labels and find the unique classes
-    y = labels
+    y = labels.numpy()
     classes = np.unique(y)
     print(classes)
 
@@ -330,18 +285,35 @@ def split_dataset_class(g, labels, n, m, seed ):
 
     # Iterate through each class and assign indices to train, val, and test
     for c in classes:
+
         # Find all indices of class c
         class_idx = np.where(y == c)[0]
         np.random.shuffle(class_idx)  # Shuffle to ensure random selection
 
         # Check if there are enough samples
+        # Adjust n and m if there are not enough samples
         if len(class_idx) < (n + m):
-            raise ValueError(f"Not enough samples in class {c} for the required split.")
+            # Dynamically adjust n and m based on available samples
+            total_samples = len(class_idx)
+            adjusted_n = int(n * total_samples / (n + m))
+            adjusted_m = total_samples - adjusted_n  # Remaining for validation
 
-        # Append indices to respective lists
-        train_idx.extend(class_idx[:n])
-        val_idx.extend(class_idx[n:n + m])
-        test_idx.extend(class_idx[n + m:])
+            print(f"Class {c} has only {total_samples} samples. Adjusting to {adjusted_n} train and {adjusted_m} val.")
+
+            # Split into adjusted train, val, and test
+            train_idx.extend(class_idx[:n])
+            val_idx.extend(class_idx[n:n + m])
+            # No test set in this case, but you could add some
+        else:
+            # Split into train, val, and test normally
+            train_idx.extend(class_idx[:n])
+            val_idx.extend(class_idx[n:n + m])
+            test_idx.extend(class_idx[n + m:])
+
+        # # Append indices to respective lists
+        # train_idx.extend(class_idx[:n])
+        # val_idx.extend(class_idx[n:n + m])
+        # test_idx.extend(class_idx[n + m:])
 
     # Convert lists to tensors
     train_mask = torch.zeros(num_nodes, dtype=torch.bool)

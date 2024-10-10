@@ -15,7 +15,8 @@ from ST_src.models import *
 from ST_src.utils import *
 from ST_src.utils_new import *
 
-criterion = torch.nn.CrossEntropyLoss().cuda()
+#### sum/mean
+criterion = torch.nn.CrossEntropyLoss(reduction='sum').cuda()
 
 def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g, logger, FT = False):
     device = args.device

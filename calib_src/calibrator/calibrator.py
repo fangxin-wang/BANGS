@@ -10,7 +10,8 @@ from torch import nn, optim
 from torch.nn import functional as F
 
 from calib_src.calibrator.attention_ts import CalibAttentionLayer
-from calib_src.model.model import GCN
+# from calib_src.model.model import GCN
+from ST_src.models import GCN
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -108,39 +109,6 @@ class TS(nn.Module):
         return self
 
 
-class VS(nn.Module):
-    def __init__(self, model, num_classes):
-        super().__init__()
-        self.model = model
-        self.temperature = nn.Parameter(torch.ones(num_classes))
-        self.bias = nn.Parameter(torch.ones(num_classes))
-
-    def forward(self, x, edge_index):
-        logits = self.model(x, edge_index)
-        temperature = self.vector_scale(logits)
-        return logits * temperature + self.bias
-
-    def vector_scale(self, logits):
-        """
-        Expand temperature to match the size of logits
-        """
-        temperature = self.temperature.unsqueeze(0).expand(logits.size(0), logits.size(1))
-        return temperature
-
-    def fit(self, data, train_mask, test_mask, wdecay):
-        self.to(device)
-
-        def eval(logits):
-            temperature = self.vector_scale(logits)
-            calibrated = logits * temperature + self.bias
-            return calibrated
-
-        self.train_param = [self.temperature]
-        self.optimizer = optim.Adam(self.train_param, lr=0.01, weight_decay=wdecay)
-        fit_calibration(self, eval, data, train_mask, test_mask)
-        return self
-
-
 class ETS(nn.Module):
     def __init__(self, model, num_classes):
         super().__init__()
@@ -209,39 +177,40 @@ class CaGCN(nn.Module):
         super().__init__()
         self.model = model
         self.num_nodes = num_nodes
-        self.cagcn = GCN(num_class, 1, 16, drop_rate=dropout_rate, num_layers=2)
-
-    # def forward(self, x, edge_index):
-    #     logits = self.model(x, edge_index)
-    #     temperature = self.graph_temperature_scale(logits, edge_index)
-    #     return logits * F.softplus(temperature)
+        self.cagcn = GCN(nfeat=num_class,
+                         nhid=16,
+                         nclass=1,
+                         dropout=dropout_rate)
+        #  def __init__(self, in_channels, num_classes, num_hidden, drop_rate, num_layers)
+        #self.cagcn = GCN(num_class, 1, 16, drop_rate=dropout_rate, num_layers=2)
 
     def forward(self, x, adj):
         logits = self.model(x, adj)
-        temp = self.temp_model.temperature_scale(logits)
-        p = self.w1 * F.softmax(logits / temp, dim=1) + self.w2 * F.softmax(logits,
-                                                                            dim=1) + self.w3 * 1 / self.num_classes
-        return torch.log(p)
+        temperature = self.graph_temperature_scale(logits, adj)
+        return logits * F.softplus(temperature)
 
-    def graph_temperature_scale(self, logits, edge_index):
+
+    def graph_temperature_scale(self, logits, adj):
         """
         Perform graph temperature scaling on logits
         """
-        temperature = self.cagcn(logits, edge_index)
+        temperature = self.cagcn(logits, adj)
         return temperature
 
-    def fit(self, data, train_mask, test_mask, wdecay):
+    def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
         self.to(device)
-
         def eval(logits):
-            temperature = self.graph_temperature_scale(logits, data.edge_index)
+            temperature = self.graph_temperature_scale(logits, adj)
             calibrated = logits * F.softplus(temperature)
             return calibrated
 
         self.train_param = self.cagcn.parameters()
         self.optimizer = optim.Adam(self.train_param, lr=0.01, weight_decay=wdecay)
-        fit_calibration(self, eval, data, train_mask, test_mask)
+        fit_calibration(self, eval, features, adj, labels, train_mask, test_mask)
         return self
+
+
+
 
 
 class GATS(nn.Module):

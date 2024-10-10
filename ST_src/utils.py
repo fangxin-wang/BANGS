@@ -2,6 +2,13 @@ from copy import deepcopy
 
 from ST_src.data import *
 from ST_src.models import *
+import time
+
+def log_time_of_step(start_time,logging):
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info(f"{elapsed_time:.2f} seconds Passed...")
+    return
 
 
 def get_models(args, nfeat, nclass, g, FT=False):
@@ -112,7 +119,7 @@ def get_norm_logit(output, with_softmax=False):
         output[output == float('inf')] = max_finite_value
         output[output == -float('inf')] = min_finite_value
         output = torch.abs(output)
-        print(torch.max(output), torch.min(output))
+        # print(torch.max(output), torch.min(output))
 
         max_value = torch.max(output)
         min_value = torch.min(output) + EPS

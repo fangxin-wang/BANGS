@@ -4,6 +4,9 @@ Once remarked, the unlabeled data will not be remarked in next stages
 import argparse
 import os
 import sys
+import time
+
+start_time = time.time()
 
 import numpy as np
 import torch.optim as optim
@@ -13,9 +16,9 @@ from utils_baseline import *
 os_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os_path)
 
-from utils import accuracy
-from utils import *
-from data import *
+
+from ST_src.utils import *
+from ST_src.data import *
 import logging
 
 # Training settings
@@ -45,14 +48,14 @@ parser.add_argument('--patience', type=int, default=200)
 parser.add_argument('--multiview', action='store_true')
 
 parser.add_argument("--seed", type=int, default=1024, help="Random seed")
-parser.add_argument("--gpu", type=int, default=3, help="gpu id")
-parser.add_argument("--device", type=str, default='cpu', help="device of the model")
+parser.add_argument("--gpu", type=int, default=0, help="gpu id")
+parser.add_argument("--device", type=str, default='gpu', help="device of the model")
 
 parser.add_argument('--n_cluster', type=int, default=200, help='Number of clusters')
 parser.add_argument('--max_iter', type=int, default=20, help='Number of epochs for kmeans')
 args = parser.parse_args()
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 criterion = torch.nn.CrossEntropyLoss().cuda()
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(device)
@@ -161,7 +164,12 @@ if __name__ == '__main__':
         ]
     )
     logger = logging.getLogger()
-    g, adj, features, labels, idx_train, idx_val, idx_test, oadj, _ = load_data(args.dataset)
+
+    g, adj, features, labels, idx_train, idx_val, idx_test = load_data(args.dataset,
+                                                                       args.device, args.seed,
+                                                                       0,
+                                                                       0.05,0.15)
+
 
     g = g.to(device)
     features = features.to(device)
@@ -210,12 +218,14 @@ if __name__ == '__main__':
             logger.info('total number of pl sample: {}, pl_acc: {:.5f}'.format(
                 len(idx_train_ag[idx_train_ag == True]) - len(idx_train[idx_train == True]), pred_diff))
 
+
             best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels, labels,
                                 g, FT=True)
             # Testing
             acc_test, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
             tests.append(acc_test)
             pl_acc.append(pred_diff)
+        log_time_of_step(start_time, logging)
 
     logger.info('original acc: {:.5f}, best test accuracy: {:.5f}, pl_acc{:.5f}'.format(
         acc_test0, max(tests), pl_acc[np.argmax(tests)]))

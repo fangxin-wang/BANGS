@@ -38,7 +38,7 @@ class GCN(torch.nn.Module):
 
         self.layer_list = torch.nn.ModuleDict(layer_list)
 
-    def forward(self, x, g):
+    def forward(self, x, g): # g: edge_idx
         for i in range(len(self.feature_list) - 1):
             x = self.layer_list["conv" + str(i + 1)](g, x)
             if i < len(self.feature_list) - 2:

@@ -71,7 +71,6 @@ def get_influence_matrix(adj_matrix, k):
 
     return influence_matrix_list
 
-
 def get_ppr_influence_matrix(adj, alpha=0.85, tol=1e-4, max_iter=100):
     device = adj.device
     N = adj.size(0)
@@ -84,7 +83,7 @@ def get_ppr_influence_matrix(adj, alpha=0.85, tol=1e-4, max_iter=100):
     degree = torch.sparse.sum(adj, dim=1).to_dense()
     D_inv = torch.diag(1.0 / degree)
     # Transition matrix M = D^(-1) * adj
-    M = torch.sparse.mm(D_inv, adj)
+    M = torch.sparse.mm(D_inv, adj).to(device)
 
     for i in range(max_iter):
         pagerank_new = alpha * torch.sparse.mm(M, pagerank) + (1 - alpha) * I
@@ -95,50 +94,83 @@ def get_ppr_influence_matrix(adj, alpha=0.85, tol=1e-4, max_iter=100):
             break
         print(i, '-th round, ERR:', ERR)
         pagerank = pagerank_new
-    print(pagerank.size())
-    return pagerank.to_sparse()
+    print(pagerank.shape)
+    return pagerank #.to_sparse()
+
+import torch
+import dgl
+import dgl.function as fn
+import dgl.sparse as dglsp
 
 
-def get_k_hop_neighbors(adj_matrix, node_indices, k):
-    device = adj_matrix.device
-    # print(device)
-    N = adj_matrix.size(0)
-    neighbors = node_indices.clone()
+def coo_matrix_2_sparse_tensor(coo):
+    values = coo.data
+    indices = np.vstack((coo.row, coo.col))
 
-    # Create a tensor to keep track of visited nodes
-    visited = torch.zeros(N, dtype=torch.bool).to(device)
-    visited[node_indices] = True
+    i = torch.LongTensor(indices)
+    v = torch.FloatTensor(values)
+    shape = coo.shape
 
-    # BFS to get k-hop neighbors
-    current_level_nodes = node_indices
+    return torch.sparse.FloatTensor(i, v, torch.Size(shape))
 
-    for _ in range(k):
-        # Find the neighbors of the current level nodes
-        # Convert current level nodes to a dense one-hot vector
-        current_level_one_hot = torch.zeros(N)
-        current_level_one_hot[current_level_nodes] = 1
-        current_level_one_hot = current_level_one_hot.unsqueeze(1).to(device)
-        # print(adj_matrix.device, current_level_one_hot.device)
+def get_deg_matrix_sparse_tensor(g):
+    N = g.number_of_nodes()
+    # Precompute out-degree to normalize messages
+    degs = g.out_degrees().float()
+    #degs[degs == 0] = 1  # To avoid division by zero
+    degs_inv = dglsp.diag((1. / degs))
 
-        # Multiply adjacency matrix with one-hot vector to get neighbors
-        next_level_one_hot = torch.sparse.mm(adj_matrix, current_level_one_hot).squeeze(1)
+    deg_coo = torch.sparse_coo_tensor(
+        degs_inv.indices(),
+        degs_inv.val,
+        (N,N)
+    )
+    return deg_coo
 
-        # Find the indices of the next level neighbors
-        next_level_nodes = torch.nonzero(next_level_one_hot, as_tuple=False).flatten().to(device)
 
-        # Remove already visited nodes
-        next_level_nodes = next_level_nodes[~visited[next_level_nodes]]
+def caluclate_W(g, device):
 
-        # Update the visited nodes
-        visited[next_level_nodes] = True
+    deg_coo = get_deg_matrix_sparse_tensor(g).to(device)
+    adj_mtx = g.adj_external(scipy_fmt='coo')
+    adj_coo = torch.transpose( coo_matrix_2_sparse_tensor(adj_mtx) , 0, 1).to(device)
+    # Nomarlized adj: W = AD^{-1} for random walk, normalized by end node (column)
+    # Note: W = D^{-1/2}AD^{1/2} in model training
+    W = torch.sparse.mm( adj_coo, deg_coo)
+    print(torch.sum(W, dim=1), torch.sum(W, dim=0))
+    return W
 
-        # Add new level neighbors to the list of all neighbors
-        neighbors = torch.cat((neighbors, next_level_nodes))
 
-        # Move to the next level
-        current_level_nodes = next_level_nodes
+def compute_ppr_matrix_parallel(g, W, node_set = None, alpha=0.15, max_iter=100, tol=5e-6, T=None):
+    N = g.number_of_nodes()
+    n = node_set.size(0)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    W = W.to(device)
 
-    return neighbors
+    if T is None:
+        T = torch.ones(N, n).to(device) / n  # Uniform teleport matrix
+    else:
+        T = T.to(device)
+        T = T / T.sum(dim=0, keepdim=True)  # Ensure columns sum to 1
+
+    # Initialize PPR matrix
+    pagerank = T.clone()
+
+    for _ in range(max_iter):
+        #print(_)
+        prev_pagerank = pagerank.clone()
+        pagerank = alpha * T + (1 - alpha) * torch.sparse.mm( W , prev_pagerank )
+        # Check for convergence
+        diff = torch.norm(pagerank - prev_pagerank, p='fro')
+        print(_, "   ", diff)
+        if diff < tol:
+            break
+
+    final = torch.transpose(pagerank,0,1)
+    print(final.shape)
+    # Check: columns should all sum to the same prob (random walk)
+    # print(torch.sum(pagerank, dim=1))
+    return final
+
 
 
 def add_sparse_matrices(mat1, mat2):
@@ -154,6 +186,24 @@ def add_sparse_matrices(mat1, mat2):
     result = torch.sparse.FloatTensor(indices, values, mat1.size())
     return result.coalesce()
 
+
+def get_sparse_column(sparse_tensor, col_idx):
+    indices = sparse_tensor._indices()
+    values = sparse_tensor._values()
+
+    col_indices = (indices[1, :] == col_idx).nonzero(as_tuple=True)[0]
+
+    row_indices = indices[0, col_indices]
+    col_values = values[col_indices]
+
+    sparse_col_tensor = torch.sparse_coo_tensor(
+        torch.stack([row_indices, torch.zeros_like(row_indices)]),
+        col_values,
+        (sparse_tensor.size(0), 1),
+        device=sparse_tensor.device
+    )
+
+    return sparse_col_tensor
 
 def scale_sparse_matrix(sparse_mat, scale):
     """
@@ -323,3 +373,95 @@ def get_adaptive_threshold(output, idx_train, global_thres, local_thres, decay=0
     mask = max_prob > local_thres_final[argmax_pos]
 
     return mask, global_thres_updated, local_thres_updated
+
+def compute_ece(predictions, labels, n_bins=20):
+    # Ensure predictions are probabilities
+    if predictions.ndim == 1:
+        predictions = predictions.unsqueeze(1)
+    confidences, predictions = torch.max(predictions, dim=1)
+    accuracies = predictions.eq(labels)
+
+    ece = torch.zeros(1, device=predictions.device)
+    bin_boundaries = torch.linspace(0, 1, n_bins + 1, device=predictions.device)
+
+    for bin_lower, bin_upper in zip(bin_boundaries[:-1], bin_boundaries[1:]):
+        in_bin = confidences.gt(bin_lower.item()) * confidences.le(bin_upper.item())
+        prop_in_bin = in_bin.float().mean()
+
+        if prop_in_bin.item() > 0:
+            accuracy_in_bin = accuracies[in_bin].float().mean()
+            avg_confidence_in_bin = confidences[in_bin].mean()
+            ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
+
+    return ece.item()
+
+
+def Entropy_utility(y_probs, idx_sampled, idx_train, idx_train_ag, idx_unlabeled, influence_matrix):
+    device = influence_matrix.device
+    # print(f"Device of influence_matrix: {device}")
+    """
+    y_probs: idx_train -> one hot
+    """
+    if idx_sampled.dim() == 0:
+        idx_sampled = idx_sampled.unsqueeze(0)
+
+    idx_train_ag, idx_train = torch.where(idx_train_ag == True)[0], torch.where(idx_train == True)[0]
+    idx_pseudo_ag = torch.cat((idx_train_ag, idx_sampled), dim=0)
+
+    # Creating a boolean mask for influenced nodes
+    influenced_mask = torch.zeros(influence_matrix.size(0), dtype=torch.bool).to(device)
+
+    # Iterate over idx_pseudo_ag to update the influenced_mask
+    for idx in idx_pseudo_ag:
+        column_tensor = get_sparse_column(influence_matrix, idx)
+        # print(column_tensor.device, influenced_mask.device)
+        influenced_mask |= (column_tensor.to_dense().squeeze() > 0)
+
+    influenced_nodes = torch.where(influenced_mask & idx_unlabeled)[0]
+    # print("influenced_nodes")
+
+    # ####################
+    # # Randomly select positions to set to False
+    # bool_tensor = influenced_mask & idx_unlabeled
+    # num_to_set_false = int( len(bool_tensor)/2 )
+    # indices_to_set_false = torch.randperm(len(bool_tensor))[:num_to_set_false]
+    #
+    # # Set the selected positions to False
+    # bool_tensor[indices_to_set_false] = False
+    # influenced_nodes = torch.where(bool_tensor) [0]
+    # ####################
+
+    influence_matrix_influenced = influence_matrix.index_select(0, influenced_nodes)
+    influence_submatrix = influence_matrix_influenced.index_select(1, idx_pseudo_ag)
+    # print(influence_matrix_influenced.size(), influence_submatrix.size())
+
+    total_prob_origin = F.normalize(
+        torch.sparse.mm(influence_submatrix, y_probs[idx_pseudo_ag]), dim=1)
+
+    entropies = -torch.sum(total_prob_origin * torch.log(total_prob_origin + 1e-9), dim=1)
+    # print(total_prob_origin.size(), entropies.size())
+    total_Ent = entropies.sum()
+    # print('total_Ent', total_Ent.item() )
+
+    # total_Ent = 0
+    # for node_j in influenced_nodes:
+    #     total_prob_origin = F.normalize(
+    #         torch.matmul(influence_matrix[node_j].to_dense()[idx_pseudo_ag], y_probs[idx_pseudo_ag]), dim=0)
+    #     entropy_origin = calculate_entropy(total_prob_origin)
+    #     total_Ent += entropy_origin
+    #
+    # print('total_Ent', total_Ent)
+
+    influence_matrix_train = influence_matrix.index_select(0, idx_train)
+    influence_submatrix_train = influence_matrix_train.index_select(1, idx_pseudo_ag)
+
+    Prob_train_prop = F.normalize(
+        torch.sparse.mm(influence_submatrix_train, y_probs[idx_pseudo_ag]), dim=1
+    )
+
+    criterion = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
+    Cross_Ent = criterion(Prob_train_prop, y_probs[idx_train])
+
+    # print('Cross_Ent', Cross_Ent.item() )
+
+    return - total_Ent - Cross_Ent

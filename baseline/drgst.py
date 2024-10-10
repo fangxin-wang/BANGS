@@ -2,6 +2,7 @@ import argparse
 import os
 import random
 import sys
+import time
 
 import numpy as np
 import torch
@@ -10,10 +11,13 @@ import torch.optim as optim
 os_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os_path)
 
-from utils import *
-from data import *
+from ST_src.utils import *
+from ST_src.data import *
 import torch.nn as nn
 import logging
+
+
+start_time = time.time()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='GCN')
@@ -44,14 +48,16 @@ parser.add_argument("--random_pick", action="store_true", default=False, help="I
 parser.add_argument('--drop_method', type=str, default='dropout')
 
 parser.add_argument("--seed", type=int, default=1024, help="Random seed")
-parser.add_argument("--gpu", type=int, default=3, help="gpu id")
-parser.add_argument("--device", type=str, default='cpu', help="device of the model")
+parser.add_argument("--gpu", type=int, default=0, help="gpu id")
+parser.add_argument("--device", type=str, default='gpu', help="device of the model")
 args = parser.parse_args()
 
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
 random.seed(args.seed)
+
+start_time = time.time()
 
 criterion = torch.nn.CrossEntropyLoss().cuda()
 args.device = torch.device('cuda:{}'.format(args.gpu)) if torch.cuda.is_available() else torch.device('cpu')
@@ -163,8 +169,11 @@ if __name__ == '__main__':
         ]
     )
     logger = logging.getLogger()
-    g, adj, features, labels, idx_train, idx_val, idx_test, oadj, _ = load_data(args.dataset)
-
+    g, adj, features, labels, idx_train, idx_val, idx_test = load_data(args.dataset,
+                                                                       args.device, args.seed,
+                                                                       0,
+                                                                       0.05,0.15)
+    oadj = None
     g = g.to(device)
     features = features.to(device)
     adj = adj.to(device)
@@ -223,10 +232,13 @@ if __name__ == '__main__':
             pred_diff = len(pred_diff[pred_diff == True]) / len(pred_diff)
             logger.info('itr {} summary: added {} pl labels , pl_acc: {}'.format(itr, n_pl, pred_diff * 100))
 
+
             acc_test, _ = test(adj, features, labels, idx_test, nclass, model_path, g, logger)
             N_pl_list.append(n_pl)
             pl_acc.append(pred_diff)
             tests.append(acc_test)
+
+        log_time_of_step(start_time, logging)
 
     pl_acc = np.array(pl_acc)
     N_pl_list = np.array(N_pl_list)

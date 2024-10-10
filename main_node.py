@@ -8,7 +8,7 @@ import time
 import torch
 import torch.optim as optim
 import torch.nn as nn
-
+from dgl import PPR
 
 from ST_src.banzhaf import *
 from ST_src.data import *
@@ -50,22 +50,28 @@ parser.add_argument("--candidate_num", type=int, default=0, help="Number of cand
 
 parser.add_argument('--patience', type=int, default=500)
 parser.add_argument('--multiview', action='store_true', default=False)
+parser.add_argument('--calib', action='store_true', default=False)
 parser.add_argument("--random_pick", action="store_true", default=False, help="Indicator of random pseudo labeling")
 parser.add_argument("--conf_pick", action="store_true", default=False, help="Indicator of CPL labeling")
 parser.add_argument("--IGP_pick", action="store_true", default=False, help="Indicator of IGP labeling")
+parser.add_argument('--sample_num', type=int, default=100)
+parser.add_argument("--k_union", action="store_true", default=False, help="Only sample unions with less than k members.")
+
 
 parser.add_argument("--seed", type=int, default=1024, help="Random seed")
 parser.add_argument("--gpu", type=int, default=0, help="gpu id")
 parser.add_argument("--device", type=str, default='cpu', help="device of the model")
 parser.add_argument("--noisy", type=float, default=0, help="Flip labels")
 parser.add_argument("--PageRank", action="store_true", default=False, help="Calculate Influence Matrix by PageRank")
+parser.add_argument("--batchPPR", type=int, default=0, help="Batch PPR iteration number.")
+
 
 parser.add_argument("--train_portion", type=float, default=0.05, help="Training Label Portion")
 parser.add_argument("--valid_portion", type=float, default=0.15, help="Validation Label Portion")
 
 parser.add_argument('--split_by_num', action='store_true', default=False)
-parser.add_argument("--train_num", type=int, default=4, help="Training Label Num")
-parser.add_argument("--valid_num", type=int, default=1, help="Validation Label Num")
+parser.add_argument("--train_num", type=int, default=15, help="Training Label Num")
+parser.add_argument("--valid_num", type=int, default=5, help="Validation Label Num")
 
 args = parser.parse_args()
 
@@ -82,22 +88,20 @@ print(device, args.seed)
 start_time = time.time()
 
 
-def log_time_of_step():
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    logging.info(f"{elapsed_time:.2f} seconds Passed...")
-    return
-
-
 if __name__ == '__main__':
 
     IF_PORTION = not args.split_by_num
-    IF_CALIB = not args.multiview
+    IF_CALIB = args.calib
+
+    if not IF_PORTION:
+        train_split, valid_split = args.train_num, args.valid_num
+    else:
+        train_split, valid_split = args.train_portion, args.valid_portion
 
     g, adj, features, labels, idx_train, idx_val, idx_test = load_data(args.dataset,
                                                                        args.device, args.seed,
                                                                        args.noisy,
-                                                                       args.train_portion, args.valid_portion,
+                                                                       train_split, valid_split,
                                                                        IF_PORTION, IF_CALIB)
     print('Load!')
 
@@ -122,10 +126,10 @@ if __name__ == '__main__':
     elif args.IGP_pick:
         method = "IGP"
 
-    model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-%s-ft%s.pth' % (
-        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method, args.FT)
-    log_path = './log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-%s-ft%s.txt' % (
-        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method,  args.FT)
+    model_path = './save_model/%s-%s-itr%s-top%s-seed%s-m%.0f-%s-ft%s-ppr%s.pth' % (
+        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method, args.FT, args.PageRank)
+    log_path = './final_log/cautious-%s-%s-itr%s-top%s-seed%s-m%.0f-%s-ft%s-ppr%s.txt' % (
+        args.model, args.dataset, args.iter, args.top, args.seed, args.multiview, method, args.FT, args.PageRank)
 
     log_time_format = '%Y-%m-%d %H:%M:%S'
     log_format = '%(levelname)s %(asctime)s - %(message)s'
@@ -149,6 +153,7 @@ if __name__ == '__main__':
     test_idx_num = int(torch.sum(idx_test).cpu().numpy())
 
     logger.info(f"idx_train: {train_idx_num}, idx_val: {valid_idx_num} , idx_test: {test_idx_num}")
+    logger.info(f"Sample Num: {args.sample_num}")
 
     idx_train_ag = idx_train.clone().to(device)
     pseudo_labels = labels.clone().to(device)
@@ -156,16 +161,38 @@ if __name__ == '__main__':
     T = nn.Parameter(torch.eye(nclass, nclass).to(device))  # transition matrix
     T.requires_grad = False
 
-    # Train initial model
+    # Compute Influence Matrix
+    if args.IGP_pick:
+        if args.PageRank:
+            logger.info("PPR")
+            # When dataset is small
+            if not args.batchPPR:
+                influence_matrix = get_ppr_influence_matrix(adj)
+                # transform = PPR(avg_degree=2)
+                # N = g.number_of_nodes()
+                # new_g = transform(g)
+                # values = new_g.edata['w']
+                # row, col = new_g.adj_tensors('coo')
+                # influence_matrix = torch.sparse_coo_tensor(
+                #     torch.stack([row, col]),
+                #     values,
+                #     (N, N),
+                #     device=device
+                # )
+            else:
+                print("####test####: PPR using APPNPConv")
+                influence_matrix = None
+                # g.ndata['w'] = caluclate_W(g, device)
+                # influence_matrix = compute_ppr_matrix_parallel(g, g.ndata['W'])
 
+        else:
+            logger.info("IM 2 hop")
+            influence_matrix_list = get_influence_matrix(adj, k=2)
+
+    # Train initial model
     bald = torch.ones(n_node).to(device)
     best_valid, best_output = train(args, model_path, idx_train_ag, idx_val, idx_test, features, adj, pseudo_labels,
                                     labels, bald, T, g, logger)
-
-    # global_thres = torch.Tensor([1/nclass])
-    # local_thres = torch.full( (nclass,), 1/nclass)
-    # print(f"Original global threshold: {global_thres}, class conditional threshold: {local_thres}")
-    # global_thres, local_thres = global_thres.to(device), local_thres.to(device)
 
     ACC_LIST, ENT_LIST = [], []
     acc_test0, _, output_prev = test(args, adj, features, labels, idx_test, nclass, model_path, g, logger)
@@ -184,17 +211,9 @@ if __name__ == '__main__':
     tests = []
     pl_acc = []
 
-    log_time_of_step()
+    log_time_of_step(start_time,logging)
     # calculate influence matrix list
     # influence_matrix_list = get_influence_matrix(adj.cpu().to_dense(), k=2)
-
-    if args.IGP_pick:
-        if args.PageRank:
-            influence_matrix = get_ppr_influence_matrix(adj)
-        else:
-            influence_matrix_list = get_influence_matrix(adj, k=2)
-
-    log_time_of_step()
 
     val_acc_l, test_acc_l = [], []
 
@@ -204,11 +223,10 @@ if __name__ == '__main__':
         t0 = time.time()
         ##### 1. CONFIDENCE ########
 
-        if IF_CALIB:
-            print('calib')
-            cal_dropout_rate = 0.2
+        if args.calib:
 
-            if args.dataset == 'Pubmed':
+            if args.dataset == 'Pubmed': #Pubmed
+                cal_dropout_rate = 0.2
                 temp_model = CaGCN(model, n_node, nclass, cal_dropout_rate)
                 print('Calibrating with CaGCN...')
             else:
@@ -225,9 +243,10 @@ if __name__ == '__main__':
                 confidence, predict_labels = get_confidence(output_ave)
                 # print(torch.max(confidence), confidence[:5] )
 
-                # Normalize logits of psuedo label nodes
+                # # Normalize logits of psuedo label nodes
                 logits_norm = get_norm_logit(output_ave)
                 output_ave = logits_norm
+
 
             # output_ave = torch.softmax(logits, dim=1).detach()
             # ece_validation = compute_ece(output_ave[idx_val], labels[idx_val])
@@ -295,22 +314,20 @@ if __name__ == '__main__':
             avg_ece_validation = 0  # ece_validation/ 20
 
             if not args.PageRank:
-                # label rate
-                beta = (n_node - len(PL_node) - args.top) / n_node
+                    # label rate
+                    beta = (n_node - len(PL_node) - args.top) / n_node
 
-                # Perform the calculation: beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
-                scaled_matrix_0 = scale_sparse_matrix(influence_matrix_list[0], beta)
-                scaled_matrix_1 = scale_sparse_matrix(influence_matrix_list[1], beta * beta)
+                    # Perform the calculation: beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+                    scaled_matrix_0 = scale_sparse_matrix(influence_matrix_list[0], beta)
+                    scaled_matrix_1 = scale_sparse_matrix(influence_matrix_list[1], beta * beta)
 
-                # Add the scaled sparse matrices
-                influence_matrix = add_sparse_matrices(scaled_matrix_0, scaled_matrix_1).to(
-                    device)  # .to_dense().numpy()
-                influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
+                    # Add the scaled sparse matrices
+                    influence_matrix = add_sparse_matrices(scaled_matrix_0, scaled_matrix_1).to(
+                        device)  # .to_dense().numpy()
+                    influence_matrix = beta * influence_matrix_list[0] + beta * beta * influence_matrix_list[1]
 
                 # influence_matrix = influence_matrix_list[1]
-
-            pl_idx = get_IGP_idx_game(adj, output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix,
-                                      confidence, args, avg_ece_validation)
+            pl_idx = get_IGP_idx_game(g, output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix,confidence, args, avg_ece_validation)
             # pl_idx = get_IGP_idx(output_ave, labels, idx_train, idx_train_ag, idx_unlabeled, influence_matrix, confidence, args, avg_ece_validation)
 
         # print_node_attributes(g, labels, pl_idx, idx_train, idx_train_ag, confidence,logger)
@@ -400,9 +417,10 @@ if __name__ == '__main__':
                 'itr {} summary: added {} pl labels with confidence {:.5f}, pl_acc: {}, consistency {:.5f}, {} pl labels in total, test_acc: {:.4f}'.format(
                     itr, len(pl_idx), conf_score.min().item(), pred_diff * 100, consist, len(PL_node), acc_test))
         else:
+            print('No labels to add.')
             break
 
-        log_time_of_step()
+        log_time_of_step(start_time,logging)
 
         t3 = time.time()
         T_retrain.append(t3 - t2)

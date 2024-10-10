@@ -1,0 +1,4 @@
+INFO 2024-09-30 09:54:24 - model: GCN, dataset: LastFM, Noisy_portion: 0, N_node: 7624, N_class: 18, Method: IGP, threshold: 0, seed: 910
+INFO 2024-09-30 09:54:24 - idx_train: 381, idx_val: 1143 , idx_test: 6100
+INFO 2024-09-30 09:54:24 - Sample Num: 500
+INFO 2024-09-30 09:54:24 - PPR
