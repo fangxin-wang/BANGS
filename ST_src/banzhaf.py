@@ -80,7 +80,7 @@ def Entropy_utility_efficient(y_probs, idx_sampled, idx_train, idx_train_ag, idx
 
     # print('class_Ent', class_Ent.item() , 'individual_Ent', individual_Ent.item(), 'Cross_Ent', Cross_Ent.item())
 
-    return class_Ent - individual_Ent - Cross_Ent
+    return  -individual_Ent + class_Ent - Cross_Ent
     # return - individual_Ent
     #return - Cross_Ent - individual_Ent
 

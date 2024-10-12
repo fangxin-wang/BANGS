@@ -124,7 +124,7 @@ print(df_select)
 
 pd.set_option('display.max_rows', None)
 res = df_select.groupby(['Dataset', 'Model', 'Node Num', 'Iteration', 'Multiview', 'Selection Criterion','FT','PPR'])[
-    ['Origin', 'Best Test', 'Early Stopped', 'improve']].agg(['mean', 'std', 'count'])
+    ['Origin', 'Best Test', 'Early Stopped', 'improve']].agg(['mean', 'std'])
 
 print(res)
 
