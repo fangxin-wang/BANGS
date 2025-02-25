@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-for model in "GCN" #"GIN" "GraphSAGE" "GAT"
+for model in "GCN" # "GRAND" # "APPNP" "GAT" "GraphSAGE" # "GCN"
 do
-  for data in  "Flickr" # "Citeseer" "Pubmed" "LastFM" "APh" "Cora"
+  for data in  "Flickr" # "Citeseer" "Pubmed" "LastFM" "Cora"
   do
-    for seed in  912 #1111 #1234 #4321 42 4399 128
+    for seed in  912
     do
       #python3 -W ignore baseline/m3s.py --multiview --dataset $data --model $model --iter 5 --seed $seed
       python3 -W ignore baseline/drgst.py --dataset $data --model $model --seed $seed

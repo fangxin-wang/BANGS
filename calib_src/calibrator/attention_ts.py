@@ -9,7 +9,7 @@ from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import OptPairTensor, Adj, OptTensor
 from torch_geometric.utils import remove_self_loops, add_self_loops, softmax, degree
 
-from calib_src.data.data_utils import shortest_path_length
+
 
 
 class CalibAttentionLayer(MessagePassing):
@@ -38,7 +38,6 @@ class CalibAttentionLayer(MessagePassing):
         self.heads = heads
         self.negative_slope = negative_slope
         self.fill_value = fill_value
-        self.edge_index = edge_index
         self.num_nodes = num_nodes
 
         self.temp_lin = Linear(in_channels, heads,
@@ -51,11 +50,14 @@ class CalibAttentionLayer(MessagePassing):
         self.dist1_a = Parameter(torch.ones(1))
 
         # Compute the distances to the nearest training node of each node
-        dist_to_train = dist_to_train if dist_to_train is not None else shortest_path_length(edge_index, train_mask,
-                                                                                             bfs_depth)
-        self.register_buffer('dist_to_train', dist_to_train)
+        self.edge_index = edge_index
+        # self.edge_index = sparse_mx_to_torch_sparse_tensor_dgl(edge_index)
 
+
+        self.register_buffer('dist_to_train', dist_to_train)
         self.reset_parameters()
+
+
         if self_loops:
             # We only want to add self-loops for nodes that appear both as
             # source and target nodes:

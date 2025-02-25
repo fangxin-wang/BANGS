@@ -21,6 +21,8 @@ def parse_log_content(content):
     if matches:
         # Get the last match from the list
         last_match = matches[-1]
+        # last_match = matches[0]
+
 
         # Assign the captured values to the corresponding keys in the dictionary
         metrics['origin_accuracy'] = float(last_match[0])
@@ -110,7 +112,7 @@ df.columns = ['Model', 'Dataset', 'Iteration', 'Node Num', 'Seed', 'Multiview', 
 # df_select = df [ ~( (df ['Multiview'] == 0) & (df ['Selection Criterion'] == 'Conf')) & (df['Model'] == 'GCN') ]
 # df_select = df[ (df['Node Num'] == 100) & (df['Dataset']=='Cora') & (df['Model']== 'GCN') &(df.Seed.isin([ 1204,1234,1111,8888,6666]) ) ]
 #df_select = df[(df.Seed.isin([916,917,918])) & (df['Iteration'] == 40)]
-df_select = df[   df.Seed.isin([910, 911, 912, 913 , 914, 915, 916, 917, 918, 919]) & (df.Dataset.isin (['Cora']) )]
+df_select = df[   df.Seed.isin([910, 911, 912, 913 , 914, 915, 916, 917, 918, 919]) & (df['Iteration'] == 40) & (df['Model'] == 'GCN')]#& (df.Dataset.isin (['Cora']) )]
                   # & (df.Dataset.isin (['APh']) ) #& (df['FT'] == 'False')
                   #   ]#& (df['FT'] == 'True') & (df['PPR'] == 'True') & & (df['Node Num']==100)
                 #& ((df ['Selection Criterion'] == 'IGP') )] #|  (df ['Selection Criterion'] == 'IGP'
@@ -124,7 +126,7 @@ print(df_select)
 
 pd.set_option('display.max_rows', None)
 res = df_select.groupby(['Dataset', 'Model', 'Node Num', 'Iteration', 'Multiview', 'Selection Criterion','FT','PPR'])[
-    ['Origin', 'Best Test', 'Early Stopped', 'improve']].agg(['mean', 'std'])
+    ['Origin', 'Best Test', 'Early Stopped']].agg(['mean', 'std', 'count'])
 
 print(res)
 

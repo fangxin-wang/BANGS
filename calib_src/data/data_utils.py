@@ -124,6 +124,7 @@ def shortest_path_length(edge_index, mask, max_hop):
     """
     Return the shortest path length to the mask for every node
     """
+
     dist_to_train = torch.ones_like(mask, dtype=torch.long, device=mask.device) * torch.iinfo(torch.long).max
     seen_mask = torch.clone(mask)
     for hop in range(max_hop):

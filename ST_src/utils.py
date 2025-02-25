@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from ST_src.data import *
 from ST_src.models import *
+from ST_src.GRAND import GRAND
 import time
 
 def log_time_of_step(start_time,logging):
@@ -81,7 +82,10 @@ def get_models(args, nfeat, nclass, g, FT=False):
                        layer_dropout=0.9,
                        activation=torch.tanh,
                        batchnorm=True)
-
+    elif model_name == 'GRAND':
+        model = GRAND(nfeat, args.hidden, nclass, g, args.sample, args.order,
+                      args.dropnode_rate, args.input_droprate,
+                      args.hidden_droprate, args.use_bn)
     return model
 
 

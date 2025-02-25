@@ -37,8 +37,10 @@ def fit_calibration(temp_model, eval, features, adj, labels, train_mask, test_ma
     """
     vlss_mn = float('Inf')
     with torch.no_grad():
-
-        logits = temp_model.model(features, adj)
+        if temp_model.model.__class__.__name__== 'GRAND':
+            logits = temp_model.model(features, adj, False)
+        else:
+            logits = temp_model.model(features, adj)
         dev = labels.device
         logits = logits.to(dev)
 
@@ -214,7 +216,7 @@ class CaGCN(nn.Module):
 
 
 class GATS(nn.Module):
-    def __init__(self, model, edge_index, num_nodes, train_mask, num_class, dist_to_train, gats_args):
+    def __init__(self, model, edge_index, num_nodes, train_mask, num_class, dist_to_train, heads, bias):
         super().__init__()
         self.model = model
         self.num_nodes = num_nodes
@@ -224,13 +226,15 @@ class GATS(nn.Module):
                                          num_nodes=num_nodes,
                                          train_mask=train_mask,
                                          dist_to_train=dist_to_train,
-                                         heads=gats_args.heads,
-                                         bias=gats_args.bias)
+                                         heads=heads,
+                                         bias=bias)
+
 
     def forward(self, x, edge_index):
         logits = self.model(x, edge_index)
         temperature = self.graph_temperature_scale(logits)
         return logits / temperature
+
 
     def graph_temperature_scale(self, logits):
         """
@@ -239,7 +243,7 @@ class GATS(nn.Module):
         temperature = self.cagat(logits).view(self.num_nodes, -1)
         return temperature.expand(self.num_nodes, logits.size(1))
 
-    def fit(self, data, train_mask, test_mask, wdecay):
+    def fit(self, features, adj, labels, train_mask, test_mask, wdecay):
         self.to(device)
 
         def eval(logits):
@@ -249,397 +253,5 @@ class GATS(nn.Module):
 
         self.train_param = self.cagat.parameters()
         self.optimizer = optim.Adam(self.train_param, lr=0.01, weight_decay=wdecay)
-        fit_calibration(self, eval, data, train_mask, test_mask)
-        return self
-
-
-# multiclass isotonic regression
-# c.f.: https://github.com/zhang64-llnl/Mix-n-Match-Calibration
-class IRM(nn.Module):
-    def __init__(self, model):
-        super().__init__()
-        self.model = model
-        self.irm = IsotonicRegression(out_of_bounds='clip')
-
-    @torch.no_grad()
-    def forward(self, x, edge_index):
-        logits = self.model(x, edge_index)
-        probs = torch.softmax(logits, -1).cpu().numpy()
-        p_calib = self.irm.predict(
-            probs.flatten()).reshape(probs.shape) + 1e-9 * probs
-        return torch.log(
-            torch.from_numpy(p_calib).to(device) + torch.finfo().tiny)
-
-    @torch.no_grad()
-    def fit(self, data, train_mask, test_mask, wdecay):
-        self.to(device)
-        logits = self.model(data.x, data.edge_index)
-        labels = data.y
-        train_p = torch.softmax(logits[train_mask], -1).cpu().numpy()
-        train_y = F.one_hot(
-            labels[train_mask], train_p.shape[-1]).cpu().numpy()
-        self.irm.fit_transform(train_p.flatten(), (train_y.flatten()))
-        return self
-
-
-class Dirichlet(nn.Module):
-    def __init__(self, model, nclass: int):
-        super().__init__()
-        self.model = model
-        self.dir = nn.Linear(nclass, nclass)
-
-    def forward(self, x, edge_index):
-        return self.calibrate(self.model(x, edge_index))
-
-    def calibrate(self, logits):
-        return self.dir(torch.log_softmax(logits, -1))
-
-    def odir_loss(self, lamb: float = 0., mu: float = 0.):
-        w, b = self.dir.weight, self.dir.bias
-        loss = 0
-        if lamb:
-            k = len(b)
-            assert k >= 2
-            loss += lamb / (k * (k - 1)) * (
-                    (w ** 2).sum() - (torch.diagonal(w) ** 2).sum())
-        if mu:
-            loss += mu * (b ** 2).mean()
-        return loss
-
-    def fit(
-            self, data, train_mask, test_mask, wdecay, patience=100):
-        self.to(device)
-        optimizer = optim.Adam(self.dir.parameters(), lr=0.01)
-        vlss_mn = float('Inf')
-
-        with torch.no_grad():
-            logits = self.model(data.x, data.edge_index)
-            labels = data.y
-            model_dict = self.state_dict()
-            parameters = {k: v for k, v in model_dict.items() if
-                          k.split(".")[0] != "model"}
-
-        for epoch in range(2000):
-            self.train()
-            self.model.eval()
-            optimizer.zero_grad()
-            calibrated = self.calibrate(logits)
-            loss = F.cross_entropy(
-                calibrated[train_mask], labels[train_mask]
-            ) + self.odir_loss(wdecay, wdecay)
-            loss.backward()
-            optimizer.step()
-
-            self.eval()
-            with torch.no_grad():
-                val_loss = F.cross_entropy(
-                    calibrated[test_mask], labels[test_mask]
-                ) + self.odir_loss(wdecay, wdecay)
-                if val_loss <= vlss_mn:
-                    state_dict_early_model = copy.deepcopy(parameters)
-                    vlss_mn = np.min((val_loss.cpu().numpy(), vlss_mn))
-                    curr_step = 0
-                else:
-                    curr_step += 1
-                    if curr_step >= patience:
-                        break
-        model_dict.update(state_dict_early_model)
-        self.load_state_dict(model_dict)
-        return self
-
-
-# calibration with spline
-# c.f.: https://github.com/kartikgupta-at-anu/spline-calibration
-#
-# authors didn't provide ways to calibrate the probabilistic prediction
-#
-# we rescale the non-prediction part, which preserve ECE and ACC in most cases
-class SplineCalib(nn.Module):
-    def __init__(self, model, knots=7):
-        super().__init__()
-        self.model = model
-        self.knots = knots
-        # identity as default
-        self.calibfn = interp1d(np.asarray([0., 1.]), np.asarray([0., 1.]))
-
-    @torch.no_grad()
-    def forward(self, x, edge_index):
-        logits = self.model(x, edge_index)
-        probs = torch.softmax(logits, -1)
-        scores, preds = probs.max(-1)
-        p_calib = self.calibfn(scores.cpu().numpy()).clip(min=0.0, max=1.0)
-        p_calib = torch.from_numpy(p_calib).to(
-            device=probs.device, dtype=probs.dtype).unsqueeze(-1)
-        new_probs = probs / (1 - scores.unsqueeze(-1))
-        # mask out inf and nan
-        ok_mask = torch.any((new_probs < torch.finfo().max), dim=-1)
-        new_probs[~ok_mask, :] = (1. / (logits.shape[-1] - 1))
-        new_probs = new_probs * (1 - p_calib)
-        new_probs = torch.scatter(new_probs, -1, preds.unsqueeze(-1), p_calib)
-        return torch.log(new_probs + torch.finfo().tiny)
-
-    @torch.no_grad()
-    def fit(self, data, train_mask, test_mask, wdecay):
-        logits = self.model(data.x, data.edge_index)[train_mask]
-        scores, preds = torch.softmax(logits, -1).max(-1)
-        corrects = torch.eq(preds, data.y[train_mask])
-        scores_sorted, sort_idx = scores.sort()
-        corrects_sorted = corrects[sort_idx].cpu().numpy().astype(np.float32)
-        scores_sorted = scores_sorted.cpu().numpy()
-        del logits, scores, preds, corrects, sort_idx
-
-        # merge duplicates
-        scores_sorted, idx = np.unique(scores_sorted, return_inverse=True)
-        corrects_sorted = np.bincount(
-            idx, weights=corrects_sorted) / np.bincount(idx)
-        del idx
-
-        # Accumulate and normalize by dividing by num samples
-        nsamples = len(scores_sorted)
-        integrated_accuracy = np.cumsum(corrects_sorted) / nsamples
-        integrated_scores = np.cumsum(scores_sorted) / nsamples
-        percentile = np.linspace(0.0, 1.0, nsamples)
-
-        # Now, try to fit a spline to the accumulated accuracy
-        kx = np.linspace(0.0, 1.0, self.knots)
-        spline = Spline(
-            percentile, integrated_accuracy - integrated_scores, kx)
-
-        # Evaluate the spline to get the accuracy
-        calib_scores = scores_sorted + spline.evaluate_deriv(percentile)
-
-        # Return the interpolating function -- uses full (not decimated) scores and
-        # accuracy
-        self.calibfn = interp1d(
-            scores_sorted, calib_scores, fill_value='extrapolate')
-        return self
-
-
-# c.f.: https://github.com/kartikgupta-at-anu/spline-calibration
-class Spline:
-
-    # Initializer
-    def __init__(self, x, y, kx, runout='natural'):
-
-        # This calculates and initializes the spline
-
-        # Store the values of the knot points
-        self.kx = kx
-        self.delta = kx[1] - kx[0]
-        self.nknots = len(kx)
-        self.runout = runout
-
-        # Now, compute the other matrices
-        m_from_ky = self.ky_to_M()  # Computes second derivatives from knots
-        my_from_ky = np.concatenate([m_from_ky, np.eye(len(kx))], axis=0)
-        y_from_my = self.my_to_y(x)
-        y_from_ky = y_from_my @ my_from_ky
-
-        # Now find the least squares solution
-        ky = np.linalg.lstsq(y_from_ky, y, rcond=-1)[0]
-
-        # Return my
-        self.ky = ky
-        self.my = my_from_ky @ ky
-
-    def my_to_y(self, vecx):
-        # Makes a matrix that computes y from M
-        # The matrix will have one row for each value of x
-
-        # Make matrices of the right size
-        ndata = len(vecx)
-        nknots = self.nknots
-        delta = self.delta
-
-        mM = np.zeros((ndata, nknots))
-        my = np.zeros((ndata, nknots))
-
-        for i, xx in enumerate(vecx):
-            # First work out which knots it falls between
-            j = int(np.floor((xx - self.kx[0]) / delta))
-            if j >= self.nknots - 1: j = self.nknots - 2
-            if j < 0: j = 0
-            x = xx - j * delta
-
-            # Fill in the values in the matrices
-            mM[i, j] = -x ** 3 / (
-                    6.0 * delta) + x ** 2 / 2.0 - 2.0 * delta * x / 6.0
-            mM[i, j + 1] = x ** 3 / (6.0 * delta) - delta * x / 6.0
-            my[i, j] = -x / delta + 1.0
-            my[i, j + 1] = x / delta
-
-        # Now, put them together
-        M = np.concatenate([mM, my], axis=1)
-
-        return M
-
-    # -------------------------------------------------------------------------------
-
-    def my_to_dy(self, vecx):
-        # Makes a matrix that computes y from M for a sequence of values x
-        # The matrix will have one row for each value of x in vecx
-        # Knots are at evenly spaced positions kx
-
-        # Make matrices of the right size
-        ndata = len(vecx)
-        h = self.delta
-
-        mM = np.zeros((ndata, self.nknots))
-        my = np.zeros((ndata, self.nknots))
-
-        for i, xx in enumerate(vecx):
-            # First work out which knots it falls between
-            j = int(np.floor((xx - self.kx[0]) / h))
-            if j >= self.nknots - 1: j = self.nknots - 2
-            if j < 0: j = 0
-            x = xx - j * h
-
-            mM[i, j] = -x ** 2 / (2.0 * h) + x - 2.0 * h / 6.0
-            mM[i, j + 1] = x ** 2 / (2.0 * h) - h / 6.0
-            my[i, j] = -1.0 / h
-            my[i, j + 1] = 1.0 / h
-
-        # Now, put them together
-        M = np.concatenate([mM, my], axis=1)
-
-        return M
-
-    # -------------------------------------------------------------------------------
-
-    def ky_to_M(self):
-
-        # Make a matrix that computes the
-        A = 4.0 * np.eye(self.nknots - 2)
-        b = np.zeros(self.nknots - 2)
-        for i in range(1, self.nknots - 2):
-            A[i - 1, i] = 1.0
-            A[i, i - 1] = 1.0
-
-        # For parabolic run-out spline
-        if self.runout == 'parabolic':
-            A[0, 0] = 5.0
-            A[-1, -1] = 5.0
-
-        # For cubic run-out spline
-        if self.runout == 'cubic':
-            A[0, 0] = 6.0
-            A[0, 1] = 0.0
-            A[-1, -1] = 6.0
-            A[-1, -2] = 0.0
-
-        # The goal
-        delta = self.delta
-        B = np.zeros((self.nknots - 2, self.nknots))
-        for i in range(0, self.nknots - 2):
-            B[i, i] = 1.0
-            B[i, i + 1] = -2.0
-            B[i, i + 2] = 1.0
-
-        B = B * (6 / delta ** 2)
-
-        # Now, solve
-        Ainv = np.linalg.inv(A)
-        AinvB = Ainv @ B
-
-        # Now, add rows of zeros for M[0] and M[n-1]
-
-        # This depends on the type of spline
-        if (self.runout == 'natural'):
-            z0 = np.zeros((1, self.nknots))  # for natural spline
-            z1 = np.zeros((1, self.nknots))  # for natural spline
-
-        if (self.runout == 'parabolic'):
-            # For parabolic runout spline
-            z0 = AinvB[0]
-            z1 = AinvB[-1]
-
-        if (self.runout == 'cubic'):
-            # For cubic runout spline
-
-            # First and last two rows
-            z0 = AinvB[0]
-            z1 = AinvB[1]
-            zm1 = AinvB[-1]
-            zm2 = AinvB[-2]
-
-            z0 = 2.0 * z0 - z1
-            z1 = 2.0 * zm1 - zm2
-
-        # Reshape to (1, n) matrices
-        z0 = z0.reshape((1, -1))
-        z1 = z1.reshape((1, -1))
-
-        AinvB = np.concatenate([z0, AinvB, z1], axis=0)
-
-        return AinvB
-
-    # -------------------------------------------------------------------------------
-
-    def evaluate(self, x):
-        # Evaluates the spline at a vector of values
-        y = self.my_to_y(x) @ self.my
-        return y
-
-    # -------------------------------------------------------------------------------
-
-    def evaluate_deriv(self, x):
-
-        # Evaluates the spline at a vector (or single) point
-        y = self.my_to_dy(x) @ self.my
-        return y
-
-
-# c.f.: https://github.com/AmirooR/IntraOrderPreservingCalibration
-class OrderInvariantCalib(nn.Module):
-    def __init__(self, model, nclass: int, nhiddens: Sequence[int] = None):
-        super().__init__()
-        self.model = model
-        self.nclass = nclass
-        self.nhiddens = (nclass,) if nhiddens is None else nhiddens
-        self.base_calib = self._build_base_calib()
-        self.invariant = True
-
-    def _build_base_calib(self) -> nn.Module:
-        sizes = [self.nclass] + list(self.nhiddens)
-        layers = []
-        for ni, no in zip(sizes[:-1], sizes[1:]):
-            layers.append(nn.Linear(ni, no))
-            layers.append(nn.ReLU())
-        layers.append(nn.Linear(self.nhiddens[-1], self.nclass))
-        return nn.Sequential(*layers)
-
-    @staticmethod
-    def compute_u(sorted_logits):
-        diffs = sorted_logits[:, :-1] - sorted_logits[:, 1:]
-        diffs = torch.cat((
-            diffs,
-            torch.ones(
-                (diffs.shape[0], 1), dtype=diffs.dtype, device=diffs.device)
-        ), dim=1)
-        return diffs.flip([1])
-
-    def calibrate(self, logits):
-        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-        unsorted_indices = torch.argsort(sorted_indices, descending=False)
-        # [B, C]
-        u = self.compute_u(sorted_logits)
-        inp = sorted_logits if self.invariant else logits
-        m = self.base_calib(inp)
-        m[:, 1:] = F.softplus(m[:, 1:].clone())
-        m[:, 0] = 0
-        um = torch.cumsum(u * m, 1).flip([1])
-        out = torch.gather(um, 1, unsorted_indices)
-        return out
-
-    def forward(self, x, edge_index):
-        return self.calibrate(self.model(x, edge_index))
-
-    def fit(self, data, train_mask, test_mask, wdecay):
-        self.to(device)
-
-        self.train_param = self.base_calib.parameters()
-        self.optimizer = optim.Adam(
-            self.train_param, lr=0.01, weight_decay=wdecay)
-        fit_calibration(
-            self, self.calibrate, data, train_mask, test_mask)
+        fit_calibration(self, eval, features, adj, labels, train_mask, test_mask)
         return self

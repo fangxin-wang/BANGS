@@ -16,7 +16,10 @@ from ST_src.models import *
 from ST_src.utils import *
 from ST_src.utils_new import *
 from ST_src.train_test import *
-from calib_src.calibrator.calibrator import ETS, CaGCN
+from calib_src.calibrator.calibrator import ETS, CaGCN, GATS
+# from calib_src.data.data_utils import load_node_to_nearest_training
+from calib_src.data.data_utils import shortest_path_length
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='GCN')
@@ -72,7 +75,23 @@ parser.add_argument("--valid_portion", type=float, default=0.15, help="Validatio
 parser.add_argument('--split_by_num', action='store_true', default=False)
 parser.add_argument("--train_num", type=int, default=15, help="Training Label Num")
 parser.add_argument("--valid_num", type=int, default=5, help="Validation Label Num")
+#GRAND
 
+parser.add_argument('--dropnode_rate', type=float, default=0.5,
+                        help='Dropnode rate (1 - keep probability).')
+parser.add_argument('--input_droprate', type=float, default=0.5,
+                help='dropout rate of input layer')
+parser.add_argument('--hidden_droprate', type=float, default=0.5,
+                help='dropout rate of hidden layer')
+parser.add_argument('--order', type=int, default=8, help='Propagation step')
+parser.add_argument('--sample', type=int, default=4, help='Sampling times of dropnode')
+parser.add_argument('--tem', type=float, default=0.5, help='Sharpening temperature')
+parser.add_argument('--lam', type=float, default=1., help='Coefficient of consistency regularization')
+parser.add_argument('--use_bn', action='store_true', default=False, help='Using Batch Normalization')
+
+
+# args.sample, args.order,args.dropnode_rate, args.input_droprate,args.hidden_droprate, args.use_bn
+#
 args = parser.parse_args()
 
 np.random.seed(args.seed)
@@ -86,6 +105,15 @@ device = args.device
 print(device, args.seed)
 
 start_time = time.time()
+
+
+def sparse_mx_to_torch_sparse_tensor(sparse_mx):
+    """Convert a scipy sparse matrix to a torch sparse tensor."""
+    sparse_mx = sparse_mx.long()
+    indices = torch.vstack((sparse_mx.row, sparse_mx.col))
+    values = sparse_mx.val
+    shape = sparse_mx.shape
+    return torch.sparse_coo_tensor(indices, values, shape)
 
 
 if __name__ == '__main__':
@@ -225,23 +253,32 @@ if __name__ == '__main__':
 
         if args.calib:
 
-            if args.dataset == 'Pubmed': #Pubmed
-                cal_dropout_rate = 0.2
-                temp_model = CaGCN(model, n_node, nclass, cal_dropout_rate)
-                print('Calibrating with CaGCN...')
-            else:
-                temp_model = ETS(model, nclass)
-                print('Calibrating with ETS...')
+            # if args.dataset == 'Pubmed': #Pubmed
+            #     cal_dropout_rate = 0.2
+            #     temp_model = CaGCN(model, n_node, nclass, cal_dropout_rate)
+            #     print('Calibrating with CaGCN...')
+            # else:
+            #     temp_model = ETS(model, nclass)
+            #     print('Calibrating with ETS...')
+
+            print('Calibrating with GATS...')
+            dist_to_train = None
+            heads, bias = 2, 1
+
+            bfs_depth = 2
+            adj_origin = g.adj().long().to_dense()
+            dist_to_train = shortest_path_length( adj_origin, idx_train, bfs_depth)
+
+            edge_index = (adj_origin > 0).nonzero(as_tuple=False).t().long()
+            temp_model = GATS(model, edge_index, n_node, idx_train, nclass, dist_to_train, heads, bias)
 
             cal_wdecay = 5e-3
+
             temp_model.fit(features, adj, labels, idx_val, idx_train, cal_wdecay)
             with torch.no_grad():
                 temp_model.eval()
                 output_ave = temp_model(features, adj)
-                # print( output_ave.shape )
-
                 confidence, predict_labels = get_confidence(output_ave)
-                # print(torch.max(confidence), confidence[:5] )
 
                 # # Normalize logits of psuedo label nodes
                 logits_norm = get_norm_logit(output_ave)

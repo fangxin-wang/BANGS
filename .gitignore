@@ -154,7 +154,14 @@ cython_debug/
 .clangd/
 .vscode/
 
+# read_log
+read_log.py
+read_noise_log.py
+
 # output
+baseline/save_model/
 log/
+logs/
+final_log_iclr/
 final_log/
 save_model/

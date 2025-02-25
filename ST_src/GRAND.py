@@ -4,6 +4,20 @@ import torch.nn as nn
 import dgl.function as fn
 import torch.nn.functional as F
 
+
+def consis_loss(logps, temp, lam):
+    ps = [th.exp(p) for p in logps]
+    ps = th.stack(ps, dim=2)
+
+    avg_p = th.mean(ps, dim=2)
+    sharp_p = (th.pow(avg_p, 1. / temp) / th.sum(th.pow(avg_p, 1. / temp), dim=1, keepdim=True)).detach()
+
+    sharp_p = sharp_p.unsqueeze(2)
+    loss = th.mean(th.sum(th.pow(ps - sharp_p, 2), dim=1, keepdim=True))
+
+    loss = lam * loss
+    return loss
+
 def drop_node(feats, drop_rate, training):
     
     n = feats.shape[0]
@@ -112,11 +126,12 @@ class GRAND(nn.Module):
                  in_dim,
                  hid_dim,
                  n_class,
-                 S = 1,
-                 K = 3,
-                 node_dropout=0.0,
-                 input_droprate = 0.0, 
-                 hidden_droprate = 0.0,
+                 g,
+                 S = 4,
+                 K = 8,
+                 node_dropout=0.5,
+                 input_droprate = 0.5,
+                 hidden_droprate = 0.5,
                  batchnorm=False):
 
         super(GRAND, self).__init__()
@@ -130,8 +145,9 @@ class GRAND(nn.Module):
         
         self.dropout = node_dropout
         self.node_dropout = nn.Dropout(node_dropout)
+        self.g = g
 
-    def forward(self, graph, feats, training = True):
+    def forward(self, feats, adj, training = False):
         
         X = feats
         S = self.S
@@ -140,13 +156,13 @@ class GRAND(nn.Module):
             output_list = []
             for s in range(S):
                 drop_feat = drop_node(X, self.dropout, True)  # Drop node
-                feat = GRANDConv(graph, drop_feat, self.K)    # Graph Convolution
+                feat = GRANDConv(self.g, drop_feat, self.K)    # Graph Convolution
                 output_list.append(th.log_softmax(self.mlp(feat), dim=-1))  # Prediction
         
             return output_list
         else:   # Inference Mode
             drop_feat = drop_node(X, self.dropout, False) 
-            X =  GRANDConv(graph, drop_feat, self.K)
+            X =  GRANDConv(self.g, drop_feat, self.K)
 
             return th.log_softmax(self.mlp(X), dim = -1)
         

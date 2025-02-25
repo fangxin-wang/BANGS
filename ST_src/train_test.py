@@ -7,7 +7,8 @@ import time
 import torch
 import torch.optim as optim
 import torch.nn as nn
-
+import torch.nn.functional as F
+from ST_src.GRAND import consis_loss
 
 from ST_src.banzhaf import *
 from ST_src.data import *
@@ -17,6 +18,7 @@ from ST_src.utils_new import *
 
 #### sum/mean
 criterion = torch.nn.CrossEntropyLoss(reduction='sum').cuda()
+
 
 def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_labels, labels, bald, T, g, logger, FT = False):
     device = args.device
@@ -38,17 +40,25 @@ def train(args, model_path, idx_train, idx_val, idx_test, features, adj, pseudo_
 
     best, bad_counter = 0, 0
     for epoch in range(epochs):
+
         model.train()
         optimizer.zero_grad()
-        output = model(features, adj)
-        output = torch.softmax(output, dim=1)
-        output = torch.mm(output, T)
-        sign = False
-        loss_train = weighted_cross_entropy(output[idx_train], pseudo_labels[idx_train], bald[idx_train], args.beta,
-                                            nclass, sign)
 
-        # loss_train = criterion(output[idx_train], pseudo_labels[idx_train])
-        acc_train = accuracy(output[idx_train], pseudo_labels[idx_train])
+        if args.model == 'GRAND':
+            output = model(features, adj, True)
+            loss_train = 0
+            for k in range(args.sample):
+                loss_train += F.nll_loss(output[k][idx_train], pseudo_labels[idx_train])
+            loss_train = loss_train / args.sample + consis_loss(output, args.tem, args.lam)
+            acc_train = accuracy(output[0][idx_train], pseudo_labels[idx_train])
+        else:
+            output = model(features, adj)
+            output = torch.softmax(output, dim=1)
+            output = torch.mm(output, T)
+            sign = False
+            loss_train = weighted_cross_entropy(output[idx_train], pseudo_labels[idx_train], bald[idx_train], args.beta,
+                                                nclass, sign)
+            acc_train = accuracy(output[idx_train], pseudo_labels[idx_train])
         loss_train.backward()
         optimizer.step()
 
@@ -97,6 +107,7 @@ def test(args, adj, features, labels, idx_test, nclass, model_path, g, logger):
     model.load_state_dict(state_dict)
     model.to(args.device)
     model.eval()
+
     output = model(features, adj)
     loss_test = criterion(output[idx_test], labels[idx_test])
     acc_test = accuracy(output[idx_test], labels[idx_test])
